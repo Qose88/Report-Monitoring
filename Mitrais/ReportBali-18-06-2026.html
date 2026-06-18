@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QoS Network Monitor — 2026-06-18 16:46:06</title>
+    <title>QoS Network Monitor — 2026-06-18 17:21:45</title>
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
     <style>
       /* ── Reset & base ── */
@@ -363,7 +363,7 @@
         </span>
       </div>
       <div class="topbar-meta">
-        Generated: 2026-06-18 16:46:06 &nbsp;·&nbsp; Period: 2026-06-18 10:15 →
+        Generated: 2026-06-18 17:21:45 &nbsp;·&nbsp; Period: 2026-06-18 10:15 →
         2026-06-18 16:22 &nbsp;·&nbsp; Source: C:\Users\Adi
         Saputra\OneDrive\Desktop\QoSE\Graph\reports
       </div>
@@ -377,7 +377,7 @@
         <div class="kpi" style="--kpi-color: var(--accent)">
           <div class="kpi-label">Total Reports</div>
           <div class="kpi-value">12</div>
-          <div class="kpi-sub">5 regions · 8 IPs</div>
+          <div class="kpi-sub">4 regions · 8 IPs</div>
         </div>
         <div class="kpi" style="--kpi-color: #00e676">
           <div class="kpi-label">Avg RTT</div>
@@ -503,15 +503,11 @@
           <h3>🌏 Top Regions by Frequency</h3>
           <div class="top-item">
             <span class="top-name">MitraisBali-SG</span
-            ><span class="top-badge">7 reports</span>
+            ><span class="top-badge">8 reports</span>
           </div>
           <div class="top-item">
             <span class="top-name">MitraisBali-US</span
             ><span class="top-badge">2 reports</span>
-          </div>
-          <div class="top-item">
-            <span class="top-name">MitraisBali</span
-            ><span class="top-badge">1 reports</span>
           </div>
           <div class="top-item">
             <span class="top-name">MitraisBali-AU</span
@@ -663,7 +659,7 @@
             <tr>
               <td>2026-06-18 11:32</td>
               <td class="mono">52.114.13.125</td>
-              <td>MitraisBali</td>
+              <td>MitraisBali-SG</td>
               <td>Teams Media Gateway</td>
               <td style="color: #00e676">35.74</td>
               <td style="color: #00e676">38.31</td>
@@ -891,7 +887,7 @@
     <!-- /page -->
 
     <footer>
-      QoS Network Monitor &nbsp;·&nbsp; Generated 2026-06-18 16:46:06
+      QoS Network Monitor &nbsp;·&nbsp; Generated 2026-06-18 17:21:45
       &nbsp;·&nbsp; 12 reports from 2026-06-18 10:15 to 2026-06-18 16:22
     </footer>
 
@@ -902,23 +898,12 @@
       const CHARTS = {
         timeline: [
           {
-            x: ["2026-06-18 11:32:51"],
-            y: [38.31],
-            name: "MitraisBali",
-            type: "scatter",
-            mode: "lines+markers",
-            line: { color: "#00b4d8", width: 2 },
-            marker: { size: 7 },
-            hovertemplate:
-              "<b>%{x}</b><br>RTT Avg: %{y:.2f} ms<extra>MitraisBali</extra>",
-          },
-          {
             x: ["2026-06-18 14:13:52"],
             y: [120.95],
             name: "MitraisBali-AU",
             type: "scatter",
             mode: "lines+markers",
-            line: { color: "#00e676", width: 2 },
+            line: { color: "#00b4d8", width: 2 },
             marker: { size: 7 },
             hovertemplate:
               "<b>%{x}</b><br>RTT Avg: %{y:.2f} ms<extra>MitraisBali-AU</extra>",
@@ -927,17 +912,18 @@
             x: [
               "2026-06-18 10:15:55",
               "2026-06-18 10:37:28",
+              "2026-06-18 11:32:51",
               "2026-06-18 11:34:13",
               "2026-06-18 13:35:17",
               "2026-06-18 14:38:52",
               "2026-06-18 15:56:30",
               "2026-06-18 16:22:23",
             ],
-            y: [38.38, 37.93, 38.09, 37.44, 36.67, 37.11, 37.09],
+            y: [38.38, 37.93, 38.31, 38.09, 37.44, 36.67, 37.11, 37.09],
             name: "MitraisBali-SG",
             type: "scatter",
             mode: "lines+markers",
-            line: { color: "#ffca28", width: 2 },
+            line: { color: "#00e676", width: 2 },
             marker: { size: 7 },
             hovertemplate:
               "<b>%{x}</b><br>RTT Avg: %{y:.2f} ms<extra>MitraisBali-SG</extra>",
@@ -948,7 +934,7 @@
             name: "MitraisBali-US",
             type: "scatter",
             mode: "lines+markers",
-            line: { color: "#ff6b6b", width: 2 },
+            line: { color: "#ffca28", width: 2 },
             marker: { size: 7 },
             hovertemplate:
               "<b>%{x}</b><br>RTT Avg: %{y:.2f} ms<extra>MitraisBali-US</extra>",
@@ -956,23 +942,12 @@
         ],
         jitter: [
           {
-            x: ["2026-06-18 11:32:51"],
-            y: [2.01],
-            name: "MitraisBali",
-            type: "scatter",
-            mode: "lines+markers",
-            line: { color: "#00b4d8", width: 2, dash: "dot" },
-            marker: { size: 6 },
-            hovertemplate:
-              "<b>%{x}</b><br>Jitter: %{y:.2f} ms<extra>MitraisBali</extra>",
-          },
-          {
             x: ["2026-06-18 14:13:52"],
             y: [1.23],
             name: "MitraisBali-AU",
             type: "scatter",
             mode: "lines+markers",
-            line: { color: "#00e676", width: 2, dash: "dot" },
+            line: { color: "#00b4d8", width: 2, dash: "dot" },
             marker: { size: 6 },
             hovertemplate:
               "<b>%{x}</b><br>Jitter: %{y:.2f} ms<extra>MitraisBali-AU</extra>",
@@ -981,17 +956,18 @@
             x: [
               "2026-06-18 10:15:55",
               "2026-06-18 10:37:28",
+              "2026-06-18 11:32:51",
               "2026-06-18 11:34:13",
               "2026-06-18 13:35:17",
               "2026-06-18 14:38:52",
               "2026-06-18 15:56:30",
               "2026-06-18 16:22:23",
             ],
-            y: [1.2, 2.13, 1.09, 0.83, 0.85, 1.26, 1.62],
+            y: [1.2, 2.13, 2.01, 1.09, 0.83, 0.85, 1.26, 1.62],
             name: "MitraisBali-SG",
             type: "scatter",
             mode: "lines+markers",
-            line: { color: "#ffca28", width: 2, dash: "dot" },
+            line: { color: "#00e676", width: 2, dash: "dot" },
             marker: { size: 6 },
             hovertemplate:
               "<b>%{x}</b><br>Jitter: %{y:.2f} ms<extra>MitraisBali-SG</extra>",
@@ -1002,7 +978,7 @@
             name: "MitraisBali-US",
             type: "scatter",
             mode: "lines+markers",
-            line: { color: "#ff6b6b", width: 2, dash: "dot" },
+            line: { color: "#ffca28", width: 2, dash: "dot" },
             marker: { size: 6 },
             hovertemplate:
               "<b>%{x}</b><br>Jitter: %{y:.2f} ms<extra>MitraisBali-US</extra>",
@@ -1013,16 +989,13 @@
             x: [
               "MitraisBali-SG",
               "Unknown",
-              "MitraisBali",
               "MitraisBali-US",
               "MitraisBali-AU",
             ],
-            y: [0.0, 100.0, 0.0, 0.15, 0.0],
+            y: [0.0, 100.0, 0.15, 0.0],
             type: "bar",
-            marker: {
-              color: ["#00e676", "#ef5350", "#00e676", "#00e676", "#00e676"],
-            },
-            text: ["0.00%", "100.00%", "0.00%", "0.15%", "0.00%"],
+            marker: { color: ["#00e676", "#ef5350", "#00e676", "#00e676"] },
+            text: ["0.00%", "100.00%", "0.15%", "0.00%"],
             textposition: "outside",
             hovertemplate:
               "Region: %{x}<br>Avg Loss: <b>%{y:.2f}%</b><extra></extra>",
@@ -1033,16 +1006,13 @@
             x: [
               "MitraisBali-SG",
               "Unknown",
-              "MitraisBali",
               "MitraisBali-US",
               "MitraisBali-AU",
             ],
-            y: [4.39, 0.0, 4.38, 4.21, 4.34],
+            y: [4.39, 0.0, 4.21, 4.34],
             type: "bar",
-            marker: {
-              color: ["#00e676", "#ef5350", "#00e676", "#00e676", "#00e676"],
-            },
-            text: ["4.39", "0.00", "4.38", "4.21", "4.34"],
+            marker: { color: ["#00e676", "#ef5350", "#00e676", "#00e676"] },
+            text: ["4.39", "0.00", "4.21", "4.34"],
             textposition: "outside",
             hovertemplate:
               "Region: %{x}<br>Avg MOS: <b>%{y:.2f}</b><extra></extra>",
@@ -1083,11 +1053,10 @@
             x: [
               "MitraisBali-SG",
               "Unknown",
-              "MitraisBali",
               "MitraisBali-US",
               "MitraisBali-AU",
             ],
-            y: [34.65, 0, 35.74, 200.02, 118.41],
+            y: [34.65, 0, 200.02, 118.41],
             type: "bar",
             marker: { color: "#00e676" },
             hovertemplate: "%{x}<br>RTT Min: <b>%{y:.2f} ms</b><extra></extra>",
@@ -1097,11 +1066,10 @@
             x: [
               "MitraisBali-SG",
               "Unknown",
-              "MitraisBali",
               "MitraisBali-US",
               "MitraisBali-AU",
             ],
-            y: [37.53, 0.0, 38.31, 202.76, 120.95],
+            y: [37.63, 0.0, 202.76, 120.95],
             type: "bar",
             marker: { color: "#00b4d8" },
             hovertemplate: "%{x}<br>RTT Avg: <b>%{y:.2f} ms</b><extra></extra>",
@@ -1111,11 +1079,10 @@
             x: [
               "MitraisBali-SG",
               "Unknown",
-              "MitraisBali",
               "MitraisBali-US",
               "MitraisBali-AU",
             ],
-            y: [55.47, 0, 57.99, 206.28, 132.21],
+            y: [57.99, 0, 206.28, 132.21],
             type: "bar",
             marker: { color: "#ef5350" },
             hovertemplate: "%{x}<br>RTT Max: <b>%{y:.2f} ms</b><extra></extra>",
@@ -1152,7 +1119,7 @@
             text: [
               "MitraisBali-SG — 52.114.13.125",
               "MitraisBali-SG — 52.114.13.125",
-              "MitraisBali — 52.114.13.125",
+              "MitraisBali-SG — 52.114.13.125",
               "MitraisBali-SG — 52.114.55.80",
               "MitraisBali-US — 52.115.242.116",
               "MitraisBali-US — 52.115.242.116",
