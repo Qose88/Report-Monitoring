@@ -1,0 +1,1169 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QOSE-MONITORING</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0d1117;
+        --bg-card: #161b22;
+        --bg-hover: #1c2128;
+        --border: #30363d;
+        --border-s: #21262d;
+        --txt: #e6edf3;
+        --txt-2: #7d8590;
+        --txt-3: #4d5566;
+        --blue: #58a6ff;
+        --green: #3fb950;
+        --yellow: #e3b341;
+        --purple: #bc8cff;
+      }
+
+      body {
+        font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+        background: var(--bg);
+        color: var(--txt);
+        min-height: 100vh;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+
+      /* ── TOP BAR ── */
+      .topbar {
+        border-bottom: 0.5px solid var(--border-s);
+        padding: 0.75rem 0;
+      }
+      .topbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+      .repo-path {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+      }
+      .repo-path .org {
+        color: var(--txt-2);
+      }
+      .repo-path .slash {
+        color: var(--txt-3);
+      }
+      .repo-path .name {
+        color: var(--blue);
+        font-weight: 500;
+      }
+      .branch-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: var(--bg-card);
+        border: 0.5px solid var(--border);
+        border-radius: 20px;
+        padding: 3px 10px;
+        font-size: 11px;
+        color: var(--txt-2);
+      }
+      .branch-pill i {
+        font-size: 12px;
+        color: var(--green);
+      }
+
+      /* ── HERO ── */
+      .hero {
+        padding: 2.5rem 0 2rem;
+        border-bottom: 0.5px solid var(--border-s);
+      }
+      h1 {
+        font-size: clamp(20px, 4vw, 28px);
+        font-weight: 500;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.5rem;
+      }
+      h1 span {
+        color: var(--blue);
+      }
+      .subtitle {
+        font-size: 13px;
+        color: var(--txt-2);
+        max-width: 560px;
+        line-height: 1.7;
+        margin-bottom: 1.25rem;
+      }
+      .hero-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.25rem;
+      }
+      .meta-pill {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        color: var(--txt-2);
+      }
+      .meta-pill i {
+        font-size: 13px;
+        color: var(--blue);
+      }
+
+      /* ── SECTION LABEL ── */
+      .sec-label {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--txt-3);
+        margin-bottom: 0.75rem;
+      }
+      .sec-label i {
+        font-size: 13px;
+        color: var(--blue);
+      }
+
+      /* ── SEARCH ── */
+      .search-wrap {
+        position: relative;
+        margin-bottom: 1rem;
+      }
+      .search-wrap i {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 15px;
+        color: var(--txt-3);
+        pointer-events: none;
+      }
+      #search {
+        width: 100%;
+        background: var(--bg-card);
+        border: 0.5px solid var(--border);
+        border-radius: 6px;
+        padding: 8px 12px 8px 34px;
+        color: var(--txt);
+        font-family: inherit;
+        font-size: 12px;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      #search:focus {
+        border-color: var(--blue);
+      }
+      #search::placeholder {
+        color: var(--txt-3);
+      }
+
+      /* ── GROUP (subfolder) ── */
+      .groups {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .group {
+      }
+
+      .group-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 0.6rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 0.5px solid var(--border-s);
+      }
+      .group-header i {
+        font-size: 15px;
+        color: var(--yellow);
+      }
+      .group-name {
+        font-size: 13px;
+        color: var(--yellow);
+        font-weight: 500;
+      }
+      .group-count {
+        font-size: 11px;
+        color: var(--txt-3);
+        margin-left: auto;
+      }
+
+      /* ── CARDS ── */
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+        gap: 8px;
+      }
+
+      .card {
+        background: var(--bg-card);
+        border: 0.5px solid var(--border);
+        border-radius: 8px;
+        padding: 0.9rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .card:hover {
+        border-color: var(--blue);
+        background: var(--bg-hover);
+      }
+
+      .card-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+      .card-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        background: rgba(88, 166, 255, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .card-icon i {
+        font-size: 14px;
+        color: var(--blue);
+      }
+
+      .card-date {
+        font-size: 10px;
+        color: var(--txt-3);
+        white-space: nowrap;
+      }
+
+      .card-name {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--txt);
+        line-height: 1.4;
+      }
+      .card-desc {
+        font-size: 11px;
+        color: var(--txt-2);
+        line-height: 1.5;
+        flex: 1;
+      }
+      .card-link {
+        font-size: 10px;
+        color: var(--green);
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+      .card-link i {
+        font-size: 10px;
+        flex-shrink: 0;
+      }
+
+      /* tag / badge opsional */
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        font-size: 9px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 500;
+        margin-top: 4px;
+        align-self: flex-start;
+      }
+      .tag-blue {
+        background: rgba(88, 166, 255, 0.12);
+        color: var(--blue);
+      }
+      .tag-green {
+        background: rgba(63, 185, 80, 0.12);
+        color: var(--green);
+      }
+      .tag-purple {
+        background: rgba(188, 140, 255, 0.12);
+        color: var(--purple);
+      }
+      .tag-yellow {
+        background: rgba(227, 179, 65, 0.12);
+        color: var(--yellow);
+      }
+
+      /* ── EMPTY STATE ── */
+      .empty {
+        display: none;
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--txt-3);
+        font-size: 12px;
+      }
+      .empty i {
+        font-size: 28px;
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+
+      /* ── DIVIDER ── */
+      hr {
+        border: none;
+        border-top: 0.5px solid var(--border-s);
+        margin: 2rem 0;
+      }
+
+      /* ── HOW TO ADD ── */
+      .howto {
+        background: var(--bg-card);
+        border: 0.5px solid var(--border);
+        border-left: 2px solid var(--blue);
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        font-size: 12px;
+        color: var(--txt-2);
+        line-height: 1.9;
+      }
+      .howto strong {
+        color: var(--txt);
+      }
+      .howto code {
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 3px;
+        padding: 1px 5px;
+        font-size: 11px;
+        color: var(--blue);
+      }
+
+      /* ── FOOTER ── */
+      footer {
+        border-top: 0.5px solid var(--border-s);
+        padding: 1.25rem 0;
+        margin-top: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 11px;
+        color: var(--txt-3);
+      }
+      .live-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--green);
+        background: rgba(63, 185, 80, 0.08);
+        border: 0.5px solid rgba(63, 185, 80, 0.25);
+        border-radius: 20px;
+        padding: 3px 10px;
+        font-size: 11px;
+      }
+      .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--green);
+        animation: blink 2s ease-in-out infinite;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .cards {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      @media (max-width: 400px) {
+        .cards {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ═══════════════════════════════════════════════
+     TOP BAR
+════════════════════════════════════════════════ -->
+    <div class="topbar">
+      <div class="wrap topbar-inner">
+        <div class="repo-path">
+          <i
+            class="ti ti-brand-github"
+            style="font-size: 18px; color: var(--txt-2)"
+          ></i>
+          <span class="org">Qose88</span>
+          <span class="slash">/</span>
+          <span class="name">QOSE-MONITORING</span>
+        </div>
+        <div class="branch-pill"><i class="ti ti-git-branch"></i> main</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════════ -->
+    <div class="wrap">
+      <div class="hero">
+        <p class="subtitle">
+          Kumpulan laporan monitoring Quality of Service &amp; Excellence
+          (QoSE). Report diperbarui setiap hari.
+        </p>
+        <div class="hero-meta">
+          <div class="meta-pill">
+            <i class="ti ti-chart-bar"></i> HTML Reports
+          </div>
+          <div class="meta-pill"><i class="ti ti-folder"></i> Per-folder</div>
+          <div class="meta-pill">
+            <i class="ti ti-refresh"></i> Daily update
+          </div>
+          <div class="meta-pill"><i class="ti ti-world"></i> GitHub Pages</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+     REPORT INDEX
+════════════════════════════════════════════════ -->
+    <div class="wrap" style="padding-top: 2rem; padding-bottom: 1rem">
+      <div class="sec-label">
+        <i class="ti ti-layout-grid"></i> semua report
+      </div>
+
+      <div class="search-wrap">
+        <i class="ti ti-search"></i>
+        <input
+          id="search"
+          type="text"
+          placeholder="Cari nama report, folder, atau tag..."
+          autocomplete="off"
+        />
+      </div>
+
+      <!-- ════════════════════════════════════════════
+       GROUPS — EDIT DI SINI
+       Setiap .group = satu subfolder
+       Setiap .card  = satu file HTML di folder itu
+  ════════════════════════════════════════════ -->
+      <div class="groups" id="groups">
+        <!-- ─────────────────────────────────────────
+         GROUP: mitrais
+         Folder: miitrais
+    ───────────────────────────────────────── -->
+        <div class="group" data-group="week-1">
+          <div class="group-header">
+            <i class="ti ti-folder-filled"></i>
+            <span class="group-name">Mitrais</span>
+          </div>
+          <div class="cards">
+            <a class="card" href="Mitrais/Report-(12-15)-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-activity"></i></div>
+                <span class="card-date">12-15 Juni 2026</span>
+              </div>
+              <div class="card-name">Mitrais Bali — 12-15 Juni 2026</div>
+              <div class="card-desc">
+                Overview harian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Mitrais/Report-(12-15)-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Mitrais/ReportBDG-(12-15)-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-activity"></i></div>
+                <span class="card-date">12-15 Juni 2026</span>
+              </div>
+              <div class="card-name">Mitrais Bandung — 12-15 Juni 2026</div>
+              <div class="card-desc">
+                Overview harian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Mitrais/ReportBDG-(12-15)-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Mitrais/ReportJKT-(12-15)-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-activity"></i></div>
+                <span class="card-date">12-15 Juni 2026</span>
+              </div>
+              <div class="card-name">Mitrais Jakarta — 12-15 Juni 2026</div>
+              <div class="card-desc">
+                Overview harian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Mitrais/ReportJKT-(12-15)-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Mitrais/ReportJOG(12-15)-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-activity"></i></div>
+                <span class="card-date">12-15 Juni 2026</span>
+              </div>
+              <div class="card-name">Mitrais Jogja — 12-15 Juni 2026</div>
+              <div class="card-desc">
+                Overview harian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Mitrais/ReportJOG(12-15)-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Mitrais/ReportBali-18-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-activity"></i></div>
+                <span class="card-date">18 Juni 2026</span>
+              </div>
+              <div class="card-name">Mitrais Bali 18 Juni 2026</div>
+              <div class="card-desc">
+                Overview harian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Mitrais/ReportBali-18-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Mitrais/ReportBDG-18-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-activity"></i></div>
+                <span class="card-date">18 Juni 2026</span>
+              </div>
+              <div class="card-name">Mitrais Bandung 18 Juni 2026</div>
+              <div class="card-desc">
+                Overview harian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Mitrais/ReportBDG-18-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Mitrais/ReportJKT-18-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-activity"></i></div>
+                <span class="card-date">18 Juni 2026</span>
+              </div>
+              <div class="card-name">Mitrais Jakarta 18 Juni 2026</div>
+              <div class="card-desc">
+                Overview harian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Mitrais/ReportJKT-18-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Mitrais/ReportJOG-18-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-activity"></i></div>
+                <span class="card-date">18 Juni 2026</span>
+              </div>
+              <div class="card-name">Mitrais Jogja 18 Juni 2026</div>
+              <div class="card-desc">
+                Overview harian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Mitrais/ReportJOG-18-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Mitrais/ReportBali-19-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-activity"></i></div>
+                <span class="card-date">19 Juni 2026</span>
+              </div>
+              <div class="card-name">Mitrais Bali 19 Juni 2026</div>
+              <div class="card-desc">
+                Overview harian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Mitrais/ReportBali-19-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Mitrais/ReportJOG-19-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-activity"></i></div>
+                <span class="card-date">19 Juni 2026</span>
+              </div>
+              <div class="card-name">Mitrais Jogja 19 Juni 2026</div>
+              <div class="card-desc">
+                Overview harian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Mitrais/ReportJOG-19-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Mitrais/ReportJKT-19-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-activity"></i></div>
+                <span class="card-date">19 Juni 2026</span>
+              </div>
+              <div class="card-name">Mitrais Jakarta 19 Juni 2026</div>
+              <div class="card-desc">
+                Overview harian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Mitrais/ReportJKT-19-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Mitrais/ReportBDG-19-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-activity"></i></div>
+                <span class="card-date">19 Juni 2026</span>
+              </div>
+              <div class="card-name">Mitrais Bandung 19 Juni 2026</div>
+              <div class="card-desc">
+                Overview harian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Mitrais/ReportBDG-19-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Mitrais/ReportBali-22-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-activity"></i></div>
+                <span class="card-date">22 Juni 2026</span>
+              </div>
+              <div class="card-name">Mitrais Bali 22 Juni 2026</div>
+              <div class="card-desc">
+                Overview harian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Mitrais/ReportBali-22-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Mitrais/ReportJOG-22-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-activity"></i></div>
+                <span class="card-date">22 Juni 2026</span>
+              </div>
+              <div class="card-name">Mitrais Jogja 22 Juni 2026</div>
+              <div class="card-desc">
+                Overview harian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Mitrais/ReportJOG-22-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Mitrais/ReportBDG-22-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-activity"></i></div>
+                <span class="card-date">22 Juni 2026</span>
+              </div>
+              <div class="card-name">Mitrais Bandung 22 Juni 2026</div>
+              <div class="card-desc">
+                Overview harian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Mitrais/ReportBDG-22-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Mitrais/ReportJKT-22-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-activity"></i></div>
+                <span class="card-date">22 Juni 2026</span>
+              </div>
+              <div class="card-name">Mitrais Jakarta 22 Juni 2026</div>
+              <div class="card-desc">
+                Overview harian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Mitrais/ReportJKT-22-06-2026.html
+              </div>
+            </a>
+            <!--
+        TAMBAH FILE BARU DI FOLDER INI:
+        copy blok <a class="card" ...> di atas, paste di sini, ganti href/nama/tanggal
+        Jangan lupa update "X files" di .group-count
+        -->
+          </div>
+        </div>
+        <!-- /GROUP week-1 -->
+
+        <!-- ─────────────────────────────────────────
+         GROUP: Thiess
+         Folder: Thiess
+    ───────────────────────────────────────── -->
+        <div class="group" data-group="week-2">
+          <div class="group-header">
+            <i class="ti ti-folder-filled"></i>
+            <span class="group-name">Thiess</span>
+          </div>
+          <div class="cards">
+            <a class="card" href="Thiess/Report-15-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-chart-dots"></i></div>
+                <span class="card-date">15 Juni 2026</span>
+              </div>
+              <div class="card-name">Thiess - 15 juni 2026</div>
+              <div class="card-desc">
+                Laporan haraian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Thiess/Report-15-01-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Thiess/Report-18-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-chart-dots"></i></div>
+                <span class="card-date">18 Juni 2026</span>
+              </div>
+              <div class="card-name">Thiess - 18 Juni 2026</div>
+              <div class="card-desc">
+                Laporan haraian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Thiess/Report-18-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Thiess/Report-19-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-chart-dots"></i></div>
+                <span class="card-date">19 Juni 2026</span>
+              </div>
+              <div class="card-name">Thiess - 19 Juni 2026</div>
+              <div class="card-desc">
+                Laporan haraian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Thiess/Report-19-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Thiess/Report-22-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-chart-dots"></i></div>
+                <span class="card-date">22 Juni 2026</span>
+              </div>
+              <div class="card-name">Thiess - 22 Juni 2026</div>
+              <div class="card-desc">
+                Laporan haraian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Thiess/Report-22-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Thiess/Report-23-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-chart-dots"></i></div>
+                <span class="card-date">23 Juni 2026</span>
+              </div>
+              <div class="card-name">Thiess - 23 Juni 2026</div>
+              <div class="card-desc">
+                Laporan haraian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Thiess/Report-23-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Thiess/Report-25-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-chart-dots"></i></div>
+                <span class="card-date">25 Juni 2026</span>
+              </div>
+              <div class="card-name">Thiess - 25 Juni 2026</div>
+              <div class="card-desc">
+                Laporan haraian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Thiess/Report-25-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Thiess/Report-26-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-chart-dots"></i></div>
+                <span class="card-date">26 Juni 2026</span>
+              </div>
+              <div class="card-name">Thiess - 26 Juni 2026</div>
+              <div class="card-desc">
+                Laporan haraian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Thiess/Report-26-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Thiess/Report-29-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-chart-dots"></i></div>
+                <span class="card-date">29 Juni 2026</span>
+              </div>
+              <div class="card-name">Thiess - 29 Juni 2026</div>
+              <div class="card-desc">
+                Laporan haraian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Thiess/Report-29-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Thiess/Report-30-06-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-chart-dots"></i></div>
+                <span class="card-date">30 Juni 2026</span>
+              </div>
+              <div class="card-name">Thiess - 30 Juni 2026</div>
+              <div class="card-desc">
+                Laporan haraian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Thiess/Report-30-06-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Thiess/Report-2-07-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-chart-dots"></i></div>
+                <span class="card-date">2 Juli 2026</span>
+              </div>
+              <div class="card-name">Thiess - 2 Juli 2026</div>
+              <div class="card-desc">
+                Laporan haraian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Thiess/Report-02-07-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Thiess/Report-8-07-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-chart-dots"></i></div>
+                <span class="card-date">8 Juli 2026</span>
+              </div>
+              <div class="card-name">Thiess - 8 Juli 2026</div>
+              <div class="card-desc">
+                Laporan haraian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Thiess/Report-8-07-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Thiess/Report-9-07-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-chart-dots"></i></div>
+                <span class="card-date"> 9 Juli 2026</span>
+              </div>
+              <div class="card-name">Thiess - 9 Juli 2026</div>
+              <div class="card-desc">
+                Laporan haraian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Thiess/Report-9-07-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Thiess/Report-10-07-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-chart-dots"></i></div>
+                <span class="card-date"> 10 Juli 2026</span>
+              </div>
+              <div class="card-name">Thiess - 10 Juli 2026</div>
+              <div class="card-desc">
+                Laporan haraian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Thiess/Report-10-07-2026.html
+              </div>
+            </a>
+
+            <a class="card" href="Thiess/Report-13-07-2026.html">
+              <div class="card-top">
+                <div class="card-icon"><i class="ti ti-chart-dots"></i></div>
+                <span class="card-date"> 13 Juli 2026</span>
+              </div>
+              <div class="card-name">Thiess - 13 Juli 2026</div>
+              <div class="card-desc">
+                Laporan haraian metrik latency, packet loss, dan throughput.
+              </div>
+              <span class="tag tag-green"
+                ><i class="ti ti-chart-bar" style="font-size: 9px"></i>
+                monitor</span
+              >
+              <div class="card-link">
+                <i class="ti ti-external-link"></i>
+                Thiess/Report-13-07-2026.html
+              </div>
+            </a>
+            <!--
+        TAMBAH FILE BARU DI FOLDER INI:
+        copy blok <a class="card" ...> di atas, paste di sini, ganti href/nama/tanggal
+        Jangan lupa update "X files" di .group-count
+        -->
+          </div>
+        </div>
+        <!-- /GROUP week-2 -->
+
+        <!--
+    ═══════════════════════════════════════════════
+    TAMBAH SUBFOLDER BARU — copy blok ini:
+    ═══════════════════════════════════════════════
+
+    <div class="group" data-group="week-3">
+      <div class="group-header">
+        <i class="ti ti-folder-filled"></i>
+        <span class="group-name">reports / week-3</span>
+        <span class="group-count">0 files</span>
+      </div>
+      <div class="cards">
+
+        <a class="card" href="reports/week-3/nama-file.html">
+          <div class="card-top">
+            <div class="card-icon"><i class="ti ti-activity"></i></div>
+            <span class="card-date">DD Mon YYYY</span>
+          </div>
+          <div class="card-name">Judul Report</div>
+          <div class="card-desc">Deskripsi singkat isi report ini.</div>
+          <span class="tag tag-blue"><i class="ti ti-chart-line" style="font-size:9px"></i> daily</span>
+          <div class="card-link"><i class="ti ti-external-link"></i> reports/week-3/nama-file.html</div>
+        </a>
+
+      </div>
+    </div>
+
+    ═══════════════════════════════════════════════ -->
+      </div>
+      <!-- /groups -->
+
+      <div class="empty" id="empty">
+        <i class="ti ti-mood-empty"></i>
+        Tidak ada report yang cocok.
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════ -->
+    <div class="wrap">
+      <footer>
+        <span
+          >QOSE-MONITORING &nbsp;·&nbsp; GitHub Pages &nbsp;·&nbsp; Static HTML
+          Index</span
+        >
+        <div class="live-badge"><span class="dot"></span> Reports live</div>
+      </footer>
+    </div>
+
+    <script>
+      // ── SEARCH ──────────────────────────────────
+      const searchEl = document.getElementById("search");
+      const emptyEl = document.getElementById("empty");
+
+      searchEl.addEventListener("input", () => {
+        const q = searchEl.value.toLowerCase().trim();
+        let totalVisible = 0;
+
+        document.querySelectorAll(".group").forEach((group) => {
+          let groupVisible = 0;
+          group.querySelectorAll(".card").forEach((card) => {
+            const match = !q || card.textContent.toLowerCase().includes(q);
+            card.style.display = match ? "" : "none";
+            if (match) groupVisible++;
+          });
+          group.style.display = groupVisible > 0 ? "" : "none";
+          totalVisible += groupVisible;
+        });
+
+        emptyEl.style.display = totalVisible === 0 ? "block" : "none";
+      });
+    </script>
+  </body>
+</html>
