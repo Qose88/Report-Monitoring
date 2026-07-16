@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QoS Network Monitor — 2026-07-16 16:39:49</title>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<style>
+/* ── Reset & base ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117; --surface:#161b22; --border:#21262d;
+  --text:#e6edf3; --muted:#8b949e; --accent:#00b4d8;
+  --good:#00e676; --warn:#ffca28; --bad:#ef5350;
+  --font:'Segoe UI',system-ui,sans-serif;
+}
+html{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.5}
+body{min-height:100vh;padding-bottom:40px}
+
+/* ── Back-to-home button ── */
+/* position:fixed = selalu nempel di viewport, tidak ikut discroll ke atas/bawah.
+   Diberi top-offset supaya tidak menimpa topbar (topbar tetap terlihat penuh di baris atas). */
+.back-home-btn{
+  position:fixed;
+  top:64px;
+  left:20px;
+  z-index:200;
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:20px;
+  padding:7px 16px;
+  font-size:12px;
+  font-weight:600;
+  text-decoration:none;
+  box-shadow:0 4px 14px rgba(0,0,0,.4);
+  transition:border-color .15s,background .15s,color .15s,transform .15s;
+}
+.back-home-btn:hover{
+  border-color:var(--accent);
+  background:#1c2128;
+  color:var(--accent);
+  transform:translateX(-2px);
+}
+.back-home-btn svg{width:14px;height:14px;flex-shrink:0}
+
+/* ── Top bar ── */
+.topbar{
+  background:linear-gradient(90deg,#010409 0%,#0d1117 100%);
+  border-bottom:1px solid var(--border);
+  padding:14px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.logo-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.topbar h1{font-size:16px;font-weight:700;letter-spacing:.5px;color:var(--text)}
+.topbar-meta{font-size:11px;color:var(--muted)}
+
+/* ── Page wrapper ── */
+.page{max-width:1400px;margin:0 auto;padding:24px 24px 0}
+
+/* ── Section title ── */
+.section-title{
+  font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);border-bottom:1px solid var(--border);
+  padding-bottom:8px;margin:28px 0 16px;
+}
+
+/* ── KPI grid ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:4px}
+.kpi{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:16px;position:relative;overflow:hidden;
+}
+.kpi::after{
+  content:"";position:absolute;bottom:0;left:0;right:0;height:3px;
+  background:var(--kpi-color,var(--accent));
+}
+.kpi-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.kpi-value{font-size:26px;font-weight:700;color:var(--text);line-height:1}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:5px}
+
+/* ── Chart grid ── */
+.chart-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.chart-grid-3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.chart-grid-1{display:grid;grid-template-columns:1fr;margin-bottom:14px}
+.chart-box{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:16px;
+}
+.chart-box h3{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.chart-inner{width:100%;min-height:260px}
+
+/* ── Side panels ── */
+.side-panel{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:16px;
+}
+.side-panel h3{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px}
+.top-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:7px 0;border-bottom:1px solid var(--border);
+}
+.top-item:last-child{border-bottom:none}
+.top-name{font-size:13px;color:var(--text)}
+.top-badge{
+  font-size:11px;background:#00b4d822;color:var(--accent);
+  border:1px solid #00b4d844;border-radius:20px;padding:2px 10px;
+}
+
+/* ── Table ── */
+.table-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--border);border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+thead th{
+  background:#0d1117;color:var(--muted);font-weight:600;
+  font-size:11px;letter-spacing:.5px;text-transform:uppercase;
+  padding:10px 14px;text-align:left;white-space:nowrap;
+  border-bottom:1px solid var(--border);position:sticky;top:0;
+}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+tbody tr:hover{background:#1c2128}
+tbody td{padding:9px 14px;color:var(--text);white-space:nowrap}
+.mono{font-family:Consolas,monospace;font-size:12px}
+.badge{
+  display:inline-block;padding:2px 10px;border-radius:20px;
+  font-size:11px;font-weight:700;letter-spacing:.5px;
+}
+
+/* ── Filter bar ── */
+.filter-bar{
+  display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center;
+}
+.filter-bar input,.filter-bar select{
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text);border-radius:6px;padding:6px 12px;font-size:12px;
+  outline:none;
+}
+.filter-bar input:focus,.filter-bar select:focus{border-color:var(--accent)}
+.filter-bar label{font-size:11px;color:var(--muted);letter-spacing:.5px}
+
+/* ── Threshold legend ── */
+.threshold-row{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:12px}
+.th-item{font-size:11px;color:var(--muted)}
+.th-item span{font-weight:700}
+.th-good{color:var(--good)}
+.th-warn{color:var(--warn)}
+.th-bad{color:var(--bad)}
+
+/* ── Footer ── */
+footer{text-align:center;font-size:11px;color:var(--muted);margin-top:32px;padding:16px;border-top:1px solid var(--border)}
+
+@media(max-width:900px){
+  .chart-grid-2,.chart-grid-3{grid-template-columns:1fr}
+  .kpi-value{font-size:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ BACK TO MAIN PAGE (fixed, tidak ikut scroll, tidak menutupi elemen lain) ═══ -->
+<a href="../index.html" class="back-home-btn" title="Kembali ke halaman utama">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+  Kembali
+</a>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo-dot"></div>
+    <h1>🖥️ QoS Monitor</h1>
+    <span style="font-size:11px;color:#30363d;padding:2px 10px;background:#161b22;border-radius:20px;border:1px solid #21262d">
+      Teams Diagnostics
+    </span>
+  </div>
+  <div class="topbar-meta">
+    Generated: 2026-07-16 16:39:49 &nbsp;·&nbsp;
+    Period: 2026-07-16 09:03 → 2026-07-16 15:31 &nbsp;·&nbsp;
+    Source: C:\Users\Adi Saputra\OneDrive\Desktop\QoSE\Graph\reports
+  </div>
+</div>
+
+<div class="page">
+
+<!-- ═══════ KPI ════════════════════════════════════════════════════════════ -->
+<div class="section-title">📊 Summary — 14 Reports</div>
+
+<div class="kpi-grid">
+  <div class="kpi" style="--kpi-color:var(--accent)">
+    <div class="kpi-label">Total Reports</div>
+    <div class="kpi-value">14</div>
+    <div class="kpi-sub">2 regions · 13 IPs</div>
+  </div>
+  <div class="kpi" style="--kpi-color:#00e676">
+    <div class="kpi-label">Avg RTT</div>
+    <div class="kpi-value" style="color:#00e676">63.93 ms</div>
+    <div class="kpi-sub">Min 20.54 · Max 952.35 ms</div>
+  </div>
+  <div class="kpi" style="--kpi-color:var(--accent)">
+    <div class="kpi-label">Avg Std Dev</div>
+    <div class="kpi-value">12.72 ms</div>
+    <div class="kpi-sub">RTT variability</div>
+  </div>
+  <div class="kpi" style="--kpi-color:#00e676">
+    <div class="kpi-label">Avg Jitter</div>
+    <div class="kpi-value" style="color:#00e676">6.13 ms</div>
+    <div class="kpi-sub">RFC 3550 · GOOD ≤ 30 ms</div>
+  </div>
+  <div class="kpi" style="--kpi-color:#00e676">
+    <div class="kpi-label">Avg Packet Loss</div>
+    <div class="kpi-value" style="color:#00e676">0.75%</div>
+    <div class="kpi-sub">GOOD ≤ 1.0% · ACPT ≤ 5.0%</div>
+  </div>
+  <div class="kpi" style="--kpi-color:#00e676">
+    <div class="kpi-label">Avg MOS</div>
+    <div class="kpi-value" style="color:#00e676">4.34</div>
+    <div class="kpi-sub">ITU-T G.107 · Score 1–5</div>
+  </div>
+  <div class="kpi" style="--kpi-color:var(--good)">
+    <div class="kpi-label">GOOD</div>
+    <div class="kpi-value" style="color:var(--good)">13</div>
+    <div class="kpi-sub">93% of reports</div>
+  </div>
+  <div class="kpi" style="--kpi-color:var(--warn)">
+    <div class="kpi-label">WARNING</div>
+    <div class="kpi-value" style="color:var(--warn)">0</div>
+    <div class="kpi-sub">0% of reports</div>
+  </div>
+  <div class="kpi" style="--kpi-color:var(--bad)">
+    <div class="kpi-label">BAD</div>
+    <div class="kpi-value" style="color:var(--bad)">1</div>
+    <div class="kpi-sub">7% of reports</div>
+  </div>
+</div>
+
+<!-- ═══════ ROW 1: RTT Timeline + Health Pie ══════════════════════════════ -->
+<div class="section-title">📈 RTT & Jitter Timeline</div>
+<div class="chart-grid-2">
+  <div class="chart-box">
+    <h3>⏱ RTT Average per Waktu (ms)</h3>
+    <div class="threshold-row">
+      <span class="th-item th-good">■ GOOD ≤150ms</span>
+      <span class="th-item th-warn">■ ACPT ≤400ms</span>
+      <span class="th-item th-bad">■ BAD >400ms</span>
+    </div>
+    <div id="chart-timeline" class="chart-inner"></div>
+  </div>
+  <div class="chart-box">
+    <h3>〰 Jitter per Waktu (ms)</h3>
+    <div class="threshold-row">
+      <span class="th-item th-good">■ GOOD ≤30ms</span>
+      <span class="th-item th-warn">■ ACPT ≤50ms</span>
+    </div>
+    <div id="chart-jitter" class="chart-inner"></div>
+  </div>
+</div>
+
+<!-- ═══════ ROW 2: Packet Loss + MOS + Pie ════════════════════════════════ -->
+<div class="section-title">📉 Quality Metrics per Region</div>
+<div class="chart-grid-3">
+  <div class="chart-box">
+    <h3>📦 Avg Packet Loss per Region (%)</h3>
+    <div class="threshold-row">
+      <span class="th-item th-good">■ ≤1%</span>
+      <span class="th-item th-warn">■ 1–5%</span>
+      <span class="th-item th-bad">■ >5%</span>
+    </div>
+    <div id="chart-loss" class="chart-inner"></div>
+  </div>
+  <div class="chart-box">
+    <h3>🎯 Avg MOS Score (G.107)</h3>
+    <div class="threshold-row">
+      <span class="th-item th-good">■ ≥4.0</span>
+      <span class="th-item th-warn">■ 3.5–4.0</span>
+      <span class="th-item th-bad">■ &lt;3.5</span>
+    </div>
+    <div id="chart-mos" class="chart-inner"></div>
+  </div>
+  <div class="chart-box">
+    <h3>🩺 Network Health</h3>
+    <div id="chart-pie" class="chart-inner"></div>
+  </div>
+</div>
+
+<!-- ═══════ ROW 3: RTT Range + IP Freq ═══════════════════════════════════ -->
+<div class="section-title">📊 RTT Range & IP Frequency</div>
+<div class="chart-grid-2">
+  <div class="chart-box">
+    <h3>📏 RTT Min / Avg / Max per Region (ms)</h3>
+    <div id="chart-rtt-range" class="chart-inner"></div>
+  </div>
+  <div class="chart-box">
+    <h3>🔢 Top IP — Frekuensi Koneksi</h3>
+    <div id="chart-ip-freq" class="chart-inner"></div>
+  </div>
+</div>
+
+<!-- ═══════ ROW 4: Scatter RTT vs MOS ════════════════════════════════════ -->
+<div class="section-title">🔍 Korelasi RTT vs MOS</div>
+<div class="chart-grid-1">
+  <div class="chart-box">
+    <h3>Scatter: RTT Avg (ms) vs MOS Score — warna = status</h3>
+    <div id="chart-scatter" class="chart-inner" style="min-height:300px"></div>
+  </div>
+</div>
+
+<!-- ═══════ ROW 5: Top lists ══════════════════════════════════════════════ -->
+<div class="section-title">🏆 Rankings</div>
+<div class="chart-grid-2">
+  <div class="side-panel">
+    <h3>🌏 Top Regions by Frequency</h3>
+    <div class="top-item"><span class="top-name">Thiess-SG</span><span class="top-badge">9 reports</span></div><div class="top-item"><span class="top-name">Thiess-AU</span><span class="top-badge">5 reports</span></div>
+  </div>
+  <div class="side-panel">
+    <h3>🖥 Top Target IPs by Frequency</h3>
+    <div class="top-item"><span class="top-name mono">52.115.99.197</span><span class="top-badge">2×</span></div><div class="top-item"><span class="top-name mono">52.115.99.105</span><span class="top-badge">1×</span></div><div class="top-item"><span class="top-name mono">52.114.55.211</span><span class="top-badge">1×</span></div><div class="top-item"><span class="top-name mono">52.114.13.139</span><span class="top-badge">1×</span></div><div class="top-item"><span class="top-name mono">52.113.153.13</span><span class="top-badge">1×</span></div>
+  </div>
+</div>
+
+<!-- ═══════ DATA TABLE ════════════════════════════════════════════════════ -->
+<div class="section-title">📋 Detail Data — Semua Report</div>
+
+<div class="filter-bar">
+  <label>FILTER:</label>
+  <input type="text" id="filter-search" placeholder="🔍 IP / Region / Service…" oninput="filterTable()">
+  <select id="filter-status" onchange="filterTable()">
+    <option value="">Semua Status</option>
+    <option value="GOOD">GOOD</option>
+    <option value="WARNING">WARNING</option>
+    <option value="BAD">BAD</option>
+  </select>
+  <label style="margin-left:auto;font-size:12px;color:var(--muted)" id="row-count"></label>
+</div>
+
+<div class="table-wrap">
+<table id="data-table">
+  <thead>
+    <tr>
+      <th onclick="sortTable(0)">Timestamp ↕</th>
+      <th onclick="sortTable(1)">Target IP ↕</th>
+      <th onclick="sortTable(2)">Region ↕</th>
+      <th onclick="sortTable(3)">Service</th>
+      <th onclick="sortTable(4)">RTT Min ↕</th>
+      <th onclick="sortTable(5)">RTT Avg ↕</th>
+      <th onclick="sortTable(6)">RTT Max ↕</th>
+      <th onclick="sortTable(7)">Std Dev ↕</th>
+      <th onclick="sortTable(8)">Jitter ↕</th>
+      <th onclick="sortTable(9)">Loss ↕</th>
+      <th onclick="sortTable(10)">MOS ↕</th>
+      <th onclick="sortTable(11)">Status ↕</th>
+    </tr>
+  </thead>
+  <tbody id="table-body">
+
+        <tr>
+          <td>2026-07-16 09:03</td>
+          <td class="mono">52.115.99.105</td>
+          <td>Thiess-AU</td>
+          <td>None</td>
+          <td style="color:#00e676">106.13</td>
+          <td style="color:#00e676">112.62</td>
+          <td style="color:#ffca28">158.15</td>
+          <td style="color:#00e676">7.10</td>
+          <td style="color:#00e676">4.82</td>
+          <td style="color:#00e676">0.3%</td>
+          <td style="color:#00e676">4.32</td>
+          <td><span class="badge" style="background:#00e67622;color:#00e676;border:1px solid #00e67644">GOOD</span></td>
+        </tr>
+
+        <tr>
+          <td>2026-07-16 09:33</td>
+          <td class="mono">52.114.55.211</td>
+          <td>Thiess-SG</td>
+          <td>Teams Media Gateway</td>
+          <td style="color:#00e676">21.91</td>
+          <td style="color:#00e676">38.36</td>
+          <td style="color:#00e676">99.33</td>
+          <td style="color:#00e676">14.20</td>
+          <td style="color:#00e676">6.35</td>
+          <td style="color:#00e676">0.0%</td>
+          <td style="color:#00e676">4.36</td>
+          <td><span class="badge" style="background:#00e67622;color:#00e676;border:1px solid #00e67644">GOOD</span></td>
+        </tr>
+
+        <tr>
+          <td>2026-07-16 10:02</td>
+          <td class="mono">52.114.13.139</td>
+          <td>Thiess-SG</td>
+          <td>Teams Media Gateway</td>
+          <td style="color:#00e676">24.31</td>
+          <td style="color:#00e676">71.19</td>
+          <td style="color:#ef5350">952.35</td>
+          <td style="color:#00e676">64.49</td>
+          <td style="color:#00e676">18.37</td>
+          <td style="color:#00e676">0.3%</td>
+          <td style="color:#00e676">4.28</td>
+          <td><span class="badge" style="background:#00e67622;color:#00e676;border:1px solid #00e67644">GOOD</span></td>
+        </tr>
+
+        <tr>
+          <td>2026-07-16 10:32</td>
+          <td class="mono">52.113.153.13</td>
+          <td>Thiess-SG</td>
+          <td>Teams Signaling & Call Control</td>
+          <td style="color:#00e676">21.92</td>
+          <td style="color:#00e676">34.67</td>
+          <td style="color:#00e676">115.87</td>
+          <td style="color:#00e676">15.62</td>
+          <td style="color:#00e676">5.16</td>
+          <td style="color:#00e676">0.3%</td>
+          <td style="color:#00e676">4.37</td>
+          <td><span class="badge" style="background:#00e67622;color:#00e676;border:1px solid #00e67644">GOOD</span></td>
+        </tr>
+
+        <tr>
+          <td>2026-07-16 11:02</td>
+          <td class="mono">52.114.55.88</td>
+          <td>Thiess-SG</td>
+          <td>Teams Media Gateway</td>
+          <td style="color:#00e676">22.47</td>
+          <td style="color:#00e676">31.97</td>
+          <td style="color:#00e676">79.13</td>
+          <td style="color:#00e676">10.30</td>
+          <td style="color:#00e676">8.75</td>
+          <td style="color:#00e676">0.3%</td>
+          <td style="color:#00e676">4.35</td>
+          <td><span class="badge" style="background:#00e67622;color:#00e676;border:1px solid #00e67644">GOOD</span></td>
+        </tr>
+
+        <tr>
+          <td>2026-07-16 11:32</td>
+          <td class="mono">52.114.54.59</td>
+          <td>Thiess-SG</td>
+          <td>Teams Media Gateway</td>
+          <td style="color:#00e676">22.01</td>
+          <td style="color:#00e676">28.50</td>
+          <td style="color:#00e676">77.40</td>
+          <td style="color:#00e676">7.59</td>
+          <td style="color:#00e676">2.63</td>
+          <td style="color:#00e676">0.3%</td>
+          <td style="color:#00e676">4.38</td>
+          <td><span class="badge" style="background:#00e67622;color:#00e676;border:1px solid #00e67644">GOOD</span></td>
+        </tr>
+
+        <tr>
+          <td>2026-07-16 12:02</td>
+          <td class="mono">52.115.98.85</td>
+          <td>Thiess-AU</td>
+          <td>None</td>
+          <td style="color:#00e676">112.36</td>
+          <td style="color:#00e676">117.44</td>
+          <td style="color:#ffca28">150.08</td>
+          <td style="color:#00e676">4.43</td>
+          <td style="color:#00e676">6.62</td>
+          <td style="color:#00e676">0.0%</td>
+          <td style="color:#00e676">4.32</td>
+          <td><span class="badge" style="background:#00e67622;color:#00e676;border:1px solid #00e67644">GOOD</span></td>
+        </tr>
+
+        <tr>
+          <td>2026-07-16 12:32</td>
+          <td class="mono">52.114.54.56</td>
+          <td>Thiess-SG</td>
+          <td>Teams Media Gateway</td>
+          <td style="color:#00e676">21.39</td>
+          <td style="color:#00e676">25.13</td>
+          <td style="color:#00e676">41.87</td>
+          <td style="color:#00e676">2.69</td>
+          <td style="color:#00e676">2.74</td>
+          <td style="color:#00e676">0.0%</td>
+          <td style="color:#00e676">4.39</td>
+          <td><span class="badge" style="background:#00e67622;color:#00e676;border:1px solid #00e67644">GOOD</span></td>
+        </tr>
+
+        <tr>
+          <td>2026-07-16 13:02</td>
+          <td class="mono">52.113.153.0</td>
+          <td>Thiess-SG</td>
+          <td>Teams Signaling & Call Control</td>
+          <td style="color:#00e676">21.41</td>
+          <td style="color:#00e676">29.22</td>
+          <td style="color:#00e676">74.86</td>
+          <td style="color:#00e676">7.12</td>
+          <td style="color:#00e676">4.14</td>
+          <td style="color:#00e676">0.3%</td>
+          <td style="color:#00e676">4.38</td>
+          <td><span class="badge" style="background:#00e67622;color:#00e676;border:1px solid #00e67644">GOOD</span></td>
+        </tr>
+
+        <tr>
+          <td>2026-07-16 13:33</td>
+          <td class="mono">52.115.99.197</td>
+          <td>Thiess-AU</td>
+          <td>None</td>
+          <td style="color:#00e676">105.78</td>
+          <td style="color:#00e676">109.97</td>
+          <td style="color:#00e676">132.82</td>
+          <td style="color:#00e676">3.65</td>
+          <td style="color:#00e676">3.68</td>
+          <td style="color:#00e676">0.0%</td>
+          <td style="color:#00e676">4.33</td>
+          <td><span class="badge" style="background:#00e67622;color:#00e676;border:1px solid #00e67644">GOOD</span></td>
+        </tr>
+
+        <tr>
+          <td>2026-07-16 14:03</td>
+          <td class="mono">52.115.99.197</td>
+          <td>Thiess-AU</td>
+          <td>None</td>
+          <td style="color:#00e676">105.67</td>
+          <td style="color:#00e676">117.17</td>
+          <td style="color:#ffca28">167.13</td>
+          <td style="color:#00e676">10.09</td>
+          <td style="color:#00e676">5.59</td>
+          <td style="color:#00e676">1.0%</td>
+          <td style="color:#00e676">4.31</td>
+          <td><span class="badge" style="background:#00e67622;color:#00e676;border:1px solid #00e67644">GOOD</span></td>
+        </tr>
+
+        <tr>
+          <td>2026-07-16 14:33</td>
+          <td class="mono">52.115.99.201</td>
+          <td>Thiess-AU</td>
+          <td>None</td>
+          <td style="color:#00e676">106.08</td>
+          <td style="color:#00e676">126.72</td>
+          <td style="color:#ffca28">193.52</td>
+          <td style="color:#00e676">18.31</td>
+          <td style="color:#00e676">9.89</td>
+          <td style="color:#00e676">0.0%</td>
+          <td style="color:#00e676">4.29</td>
+          <td><span class="badge" style="background:#00e67622;color:#00e676;border:1px solid #00e67644">GOOD</span></td>
+        </tr>
+
+        <tr>
+          <td>2026-07-16 15:02</td>
+          <td class="mono">52.114.54.74</td>
+          <td>Thiess-SG</td>
+          <td>Teams Media Gateway</td>
+          <td style="color:#00e676">20.54</td>
+          <td style="color:#00e676">27.05</td>
+          <td style="color:#00e676">144.50</td>
+          <td style="color:#00e676">7.97</td>
+          <td style="color:#00e676">4.45</td>
+          <td style="color:#ef5350">7.0%</td>
+          <td style="color:#00e676">4.33</td>
+          <td><span class="badge" style="background:#ef535022;color:#ef5350;border:1px solid #ef535044">BAD</span></td>
+        </tr>
+
+        <tr>
+          <td>2026-07-16 15:31</td>
+          <td class="mono">52.114.54.178</td>
+          <td>Thiess-SG</td>
+          <td>Teams Media Gateway</td>
+          <td style="color:#00e676">20.67</td>
+          <td style="color:#00e676">24.95</td>
+          <td style="color:#00e676">72.24</td>
+          <td style="color:#00e676">4.57</td>
+          <td style="color:#00e676">2.69</td>
+          <td style="color:#00e676">0.7%</td>
+          <td style="color:#00e676">4.38</td>
+          <td><span class="badge" style="background:#00e67622;color:#00e676;border:1px solid #00e67644">GOOD</span></td>
+        </tr>
+  </tbody>
+</table>
+</div>
+
+</div><!-- /page -->
+
+<footer>
+  QoS Network Monitor &nbsp;·&nbsp; Generated 2026-07-16 16:39:49 &nbsp;·&nbsp;
+  14 reports from 2026-07-16 09:03 to 2026-07-16 15:31
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- PLOTLY RENDER                                                           -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+const CHARTS = {"timeline": [{"x": ["2026-07-16 09:03:29", "2026-07-16 12:02:30", "2026-07-16 13:33:21", "2026-07-16 14:03:23", "2026-07-16 14:33:01"], "y": [112.62, 117.44, 109.97, 117.17, 126.72], "name": "Thiess-AU", "type": "scatter", "mode": "lines+markers", "line": {"color": "#00b4d8", "width": 2}, "marker": {"size": 7}, "hovertemplate": "<b>%{x}</b><br>RTT Avg: %{y:.2f} ms<extra>Thiess-AU</extra>"}, {"x": ["2026-07-16 09:33:17", "2026-07-16 10:02:54", "2026-07-16 10:32:33", "2026-07-16 11:02:38", "2026-07-16 11:32:47", "2026-07-16 12:32:08", "2026-07-16 13:02:29", "2026-07-16 15:02:32", "2026-07-16 15:31:51"], "y": [38.36, 71.19, 34.67, 31.97, 28.5, 25.13, 29.22, 27.05, 24.95], "name": "Thiess-SG", "type": "scatter", "mode": "lines+markers", "line": {"color": "#00e676", "width": 2}, "marker": {"size": 7}, "hovertemplate": "<b>%{x}</b><br>RTT Avg: %{y:.2f} ms<extra>Thiess-SG</extra>"}], "jitter": [{"x": ["2026-07-16 09:03:29", "2026-07-16 12:02:30", "2026-07-16 13:33:21", "2026-07-16 14:03:23", "2026-07-16 14:33:01"], "y": [4.82, 6.62, 3.68, 5.59, 9.89], "name": "Thiess-AU", "type": "scatter", "mode": "lines+markers", "line": {"color": "#00b4d8", "width": 2, "dash": "dot"}, "marker": {"size": 6}, "hovertemplate": "<b>%{x}</b><br>Jitter: %{y:.2f} ms<extra>Thiess-AU</extra>"}, {"x": ["2026-07-16 09:33:17", "2026-07-16 10:02:54", "2026-07-16 10:32:33", "2026-07-16 11:02:38", "2026-07-16 11:32:47", "2026-07-16 12:32:08", "2026-07-16 13:02:29", "2026-07-16 15:02:32", "2026-07-16 15:31:51"], "y": [6.35, 18.37, 5.16, 8.75, 2.63, 2.74, 4.14, 4.45, 2.69], "name": "Thiess-SG", "type": "scatter", "mode": "lines+markers", "line": {"color": "#00e676", "width": 2, "dash": "dot"}, "marker": {"size": 6}, "hovertemplate": "<b>%{x}</b><br>Jitter: %{y:.2f} ms<extra>Thiess-SG</extra>"}], "loss": [{"x": ["Thiess-AU", "Thiess-SG"], "y": [0.26, 1.02], "type": "bar", "marker": {"color": ["#00e676", "#ffca28"]}, "text": ["0.26%", "1.02%"], "textposition": "outside", "hovertemplate": "Region: %{x}<br>Avg Loss: <b>%{y:.2f}%</b><extra></extra>"}], "mos": [{"x": ["Thiess-AU", "Thiess-SG"], "y": [4.31, 4.36], "type": "bar", "marker": {"color": ["#00e676", "#00e676"]}, "text": ["4.31", "4.36"], "textposition": "outside", "hovertemplate": "Region: %{x}<br>Avg MOS: <b>%{y:.2f}</b><extra></extra>"}], "pie": [{"labels": ["GOOD", "WARNING", "BAD"], "values": [13, 0, 1], "type": "pie", "hole": 0.45, "marker": {"colors": ["#00e676", "#ffca28", "#ef5350"]}, "textinfo": "label+percent", "hovertemplate": "%{label}: <b>%{value}</b> reports (%{percent})<extra></extra>"}], "ip_freq": [{"x": ["52.115.99.197", "52.115.99.105", "52.114.55.211", "52.114.13.139", "52.113.153.13"], "y": [2, 1, 1, 1, 1], "type": "bar", "marker": {"color": "#00b4d8"}, "text": ["2", "1", "1", "1", "1"], "textposition": "outside", "hovertemplate": "IP: %{x}<br>Frekuensi: <b>%{y}</b><extra></extra>"}], "rtt_range": [{"name": "RTT Min", "x": ["Thiess-AU", "Thiess-SG"], "y": [105.67, 20.54], "type": "bar", "marker": {"color": "#00e676"}, "hovertemplate": "%{x}<br>RTT Min: <b>%{y:.2f} ms</b><extra></extra>"}, {"name": "RTT Avg", "x": ["Thiess-AU", "Thiess-SG"], "y": [116.78, 34.56], "type": "bar", "marker": {"color": "#00b4d8"}, "hovertemplate": "%{x}<br>RTT Avg: <b>%{y:.2f} ms</b><extra></extra>"}, {"name": "RTT Max", "x": ["Thiess-AU", "Thiess-SG"], "y": [193.52, 952.35], "type": "bar", "marker": {"color": "#ef5350"}, "hovertemplate": "%{x}<br>RTT Max: <b>%{y:.2f} ms</b><extra></extra>"}], "scatter": [{"x": [112.62, 38.36, 71.19, 34.67, 31.97, 28.5, 117.44, 25.13, 29.22, 109.97, 117.17, 126.72, 27.05, 24.95], "y": [4.32, 4.36, 4.28, 4.37, 4.35, 4.38, 4.32, 4.39, 4.38, 4.33, 4.31, 4.29, 4.33, 4.38], "mode": "markers", "type": "scatter", "marker": {"color": ["#00e676", "#00e676", "#00e676", "#00e676", "#00e676", "#00e676", "#00e676", "#00e676", "#00e676", "#00e676", "#00e676", "#00e676", "#ef5350", "#00e676"], "size": 10, "opacity": 0.85}, "text": ["Thiess-AU — 52.115.99.105", "Thiess-SG — 52.114.55.211", "Thiess-SG — 52.114.13.139", "Thiess-SG — 52.113.153.13", "Thiess-SG — 52.114.55.88", "Thiess-SG — 52.114.54.59", "Thiess-AU — 52.115.98.85", "Thiess-SG — 52.114.54.56", "Thiess-SG — 52.113.153.0", "Thiess-AU — 52.115.99.197", "Thiess-AU — 52.115.99.197", "Thiess-AU — 52.115.99.201", "Thiess-SG — 52.114.54.74", "Thiess-SG — 52.114.54.178"], "hovertemplate": "<b>%{text}</b><br>RTT Avg: %{x:.2f} ms<br>MOS: %{y:.2f}<extra></extra>"}]};
+
+const LAYOUT = {
+  paper_bgcolor: 'rgba(0,0,0,0)',
+  plot_bgcolor:  'rgba(0,0,0,0)',
+  font:          {color:'#e6edf3', family:"'Segoe UI',system-ui,sans-serif", size:12},
+  margin:        {l:50, r:20, t:20, b:50},
+  legend:        {bgcolor:'#161b22', bordercolor:'#21262d', borderwidth:1},
+  xaxis:         {gridcolor:'#21262d', zerolinecolor:'#21262d'},
+  yaxis:         {gridcolor:'#21262d', zerolinecolor:'#21262d'},
+};
+
+const CFG = {responsive:true, displayModeBar:false};
+
+function layout(extra={}  ){return Object.assign({},LAYOUT,extra)}
+
+// Timeline RTT
+Plotly.newPlot('chart-timeline', CHARTS.timeline,
+  layout({
+    shapes:[
+      {type:'line',x0:0,x1:1,xref:'paper',y0:150,y1:150,line:{color:'#ffca2855',dash:'dot'}},
+      {type:'line',x0:0,x1:1,xref:'paper',y0:400,y1:400,line:{color:'#ef535055',dash:'dot'}}
+    ],
+    xaxis:{gridcolor:'#21262d',tickangle:-30},
+    yaxis:{gridcolor:'#21262d',title:'ms'},
+  }), CFG);
+
+// Jitter
+Plotly.newPlot('chart-jitter', CHARTS.jitter,
+  layout({
+    shapes:[
+      {type:'line',x0:0,x1:1,xref:'paper',y0:30,y1:30,line:{color:'#ffca2855',dash:'dot'}},
+      {type:'line',x0:0,x1:1,xref:'paper',y0:50,y1:50,line:{color:'#ef535055',dash:'dot'}}
+    ],
+    xaxis:{gridcolor:'#21262d',tickangle:-30},
+    yaxis:{gridcolor:'#21262d',title:'ms'},
+  }), CFG);
+
+// Packet Loss
+Plotly.newPlot('chart-loss', CHARTS.loss,
+  layout({
+    shapes:[
+      {type:'line',x0:-0.5,x1:CHARTS.loss[0].x.length-0.5,y0:1,y1:1,line:{color:'#ffca2866',dash:'dot'}},
+      {type:'line',x0:-0.5,x1:CHARTS.loss[0].x.length-0.5,y0:5,y1:5,line:{color:'#ef535066',dash:'dot'}}
+    ],
+    yaxis:{gridcolor:'#21262d',title:'%',rangemode:'tozero'},
+    xaxis:{gridcolor:'#21262d'},
+  }), CFG);
+
+// MOS
+Plotly.newPlot('chart-mos', CHARTS.mos,
+  layout({
+    shapes:[
+      {type:'line',x0:-0.5,x1:CHARTS.mos[0].x.length-0.5,y0:3.5,y1:3.5,line:{color:'#ffca2866',dash:'dot'}},
+      {type:'line',x0:-0.5,x1:CHARTS.mos[0].x.length-0.5,y0:4.0,y1:4.0,line:{color:'#00e67666',dash:'dot'}}
+    ],
+    yaxis:{gridcolor:'#21262d',title:'MOS',range:[0,5]},
+    xaxis:{gridcolor:'#21262d'},
+  }), CFG);
+
+// Pie
+Plotly.newPlot('chart-pie', CHARTS.pie,
+  layout({showlegend:true,margin:{t:10,b:10,l:10,r:10}}), CFG);
+
+// RTT Range
+Plotly.newPlot('chart-rtt-range', CHARTS.rtt_range,
+  layout({
+    barmode:'group',
+    yaxis:{gridcolor:'#21262d',title:'ms'},
+    xaxis:{gridcolor:'#21262d'},
+  }), CFG);
+
+// IP Frequency
+Plotly.newPlot('chart-ip-freq', CHARTS.ip_freq,
+  layout({
+    yaxis:{gridcolor:'#21262d',title:'Count'},
+    xaxis:{gridcolor:'#21262d',tickfont:{family:'Consolas,monospace',size:11}},
+  }), CFG);
+
+// Scatter
+Plotly.newPlot('chart-scatter', CHARTS.scatter,
+  layout({
+    xaxis:{gridcolor:'#21262d',title:'RTT Avg (ms)'},
+    yaxis:{gridcolor:'#21262d',title:'MOS Score'},
+    shapes:[
+      {type:'line',x0:0,x1:500,y0:3.5,y1:3.5,line:{color:'#ffca2844',dash:'dot'}},
+      {type:'line',x0:150,x1:150,y0:0,y1:5,line:{color:'#ffca2844',dash:'dot'}},
+    ],
+  }), CFG);
+
+// ── Table sort & filter ───────────────────────────────────────────────────
+let sortDir = {};
+function sortTable(col) {
+  const tbody = document.getElementById('table-body');
+  const rows  = Array.from(tbody.querySelectorAll('tr'));
+  sortDir[col] = !sortDir[col];
+  rows.sort((a,b)=>{
+    let va = a.cells[col].textContent.trim();
+    let vb = b.cells[col].textContent.trim();
+    const na = parseFloat(va), nb = parseFloat(vb);
+    if (!isNaN(na) && !isNaN(nb)) return sortDir[col] ? na-nb : nb-na;
+    return sortDir[col] ? va.localeCompare(vb) : vb.localeCompare(va);
+  });
+  rows.forEach(r => tbody.appendChild(r));
+  updateCount();
+}
+
+function filterTable() {
+  const search = document.getElementById('filter-search').value.toLowerCase();
+  const status = document.getElementById('filter-status').value;
+  const rows   = document.querySelectorAll('#table-body tr');
+  rows.forEach(row => {
+    const text   = row.textContent.toLowerCase();
+    const rowSt  = row.cells[11]?.textContent.trim();
+    const matchT = !search || text.includes(search);
+    const matchS = !status || rowSt === status;
+    row.style.display = (matchT && matchS) ? '' : 'none';
+  });
+  updateCount();
+}
+
+function updateCount() {
+  const visible = Array.from(document.querySelectorAll('#table-body tr')).filter(r=>r.style.display!=='none').length;
+  document.getElementById('row-count').textContent = visible + ' rows';
+}
+
+updateCount();
+</script>
+</body>
+</html>
