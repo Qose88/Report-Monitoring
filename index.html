@@ -1693,6 +1693,16 @@
     </div>
 
     <script>
+      // ── AUTO COUNT FILES PER FOLDER ─────────────
+      // Angka "X files" dihitung otomatis dari jumlah <a class="card">
+      // yang ada di dalam folder tsb. Kalau nambah/hapus card,
+      // angka ini otomatis ikut berubah, tidak perlu diedit manual.
+      document.querySelectorAll(".group").forEach((group) => {
+        const countEl = group.querySelector(".group-count");
+        const total = group.querySelectorAll(".card").length;
+        if (countEl) countEl.textContent = total + " file" + (total !== 1 ? "s" : "");
+      });
+
       // ── COLLAPSE / EXPAND FOLDER ───────────────
       // Klik group-header (nama folder) untuk buka/tutup daftar report
       // di dalamnya. Tidak menyentuh href/path sama sekali.
