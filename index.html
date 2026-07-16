@@ -187,23 +187,32 @@
       .groups {
         display: flex;
         flex-direction: column;
-        gap: 2rem;
+        gap: 0.6rem;
       }
 
       .group {
+        border: 0.5px solid var(--border-s);
+        border-radius: 10px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.01);
       }
 
       .group-header {
         display: flex;
         align-items: center;
         gap: 8px;
-        margin-bottom: 0.6rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 0.5px solid var(--border-s);
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.15s;
       }
-      .group-header i {
+      .group-header:hover {
+        background: var(--bg-hover);
+      }
+      .group-header i.ti-folder-filled {
         font-size: 15px;
         color: var(--yellow);
+        flex-shrink: 0;
       }
       .group-name {
         font-size: 13px;
@@ -215,12 +224,34 @@
         color: var(--txt-3);
         margin-left: auto;
       }
+      .chevron {
+        font-size: 15px;
+        color: var(--txt-3);
+        flex-shrink: 0;
+        transition: transform 0.2s ease;
+      }
 
       /* ── CARDS ── */
       .cards {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
         gap: 8px;
+        padding: 0 1rem 1rem;
+      }
+
+      /* collapsed = ditutup, hanya kebuka kalau header di-klik */
+      .group.collapsed .cards {
+        display: none;
+      }
+      .group.collapsed .chevron {
+        transform: rotate(-90deg);
+      }
+      /* saat sedang search, paksa terbuka supaya hasil kelihatan */
+      .group.collapsed.search-open .cards {
+        display: grid;
+      }
+      .group.collapsed.search-open .chevron {
+        transform: rotate(0deg);
       }
 
       .card {
@@ -484,16 +515,26 @@
        GROUPS — EDIT DI SINI
        Setiap .group = satu subfolder
        Setiap .card  = satu file HTML di folder itu
+
+       CATATAN COLLAPSIBLE:
+       - Tiap .group defaultnya diberi class "collapsed" supaya
+         tertutup sampai group-header di klik.
+       - Kalau mau sebuah folder terbuka dari awal (default),
+         cukup hapus kata "collapsed" dari class="group collapsed ..."
+         pada folder tersebut.
+       - JANGAN ubah href / path di dalam <a class="card">, itu sudah fix.
   ════════════════════════════════════════════ -->
       <div class="groups" id="groups">
         <!-- ─────────────────────────────────────────
          GROUP: mitrais
          Folder: miitrais
     ───────────────────────────────────────── -->
-        <div class="group" data-group="week-1">
+        <div class="group collapsed" data-group="week-1">
           <div class="group-header">
             <i class="ti ti-folder-filled"></i>
             <span class="group-name">Mitrais</span>
+            <span class="group-count">40 files</span>
+            <i class="ti ti-chevron-down chevron"></i>
           </div>
           <div class="cards">
             <a class="card" href="Mitrais/Report-(12-15)-06-2026.html">
@@ -1279,10 +1320,12 @@
          GROUP: Thiess
          Folder: Thiess
     ───────────────────────────────────────── -->
-        <div class="group" data-group="week-2">
+        <div class="group collapsed" data-group="week-2">
           <div class="group-header">
             <i class="ti ti-folder-filled"></i>
             <span class="group-name">Thiess</span>
+            <span class="group-count">16 files</span>
+            <i class="ti ti-chevron-down chevron"></i>
           </div>
           <div class="cards">
             <a class="card" href="Thiess/Report-15-06-2026.html">
@@ -1599,14 +1642,16 @@
 
         <!--
     ═══════════════════════════════════════════════
-    TAMBAH SUBFOLDER BARU — copy blok ini:
+    TAMBAH SUBFOLDER BARU — copy blok ini (jangan lupa class "collapsed"
+    kalau mau folder baru default tertutup juga):
     ═══════════════════════════════════════════════
 
-    <div class="group" data-group="week-3">
+    <div class="group collapsed" data-group="week-3">
       <div class="group-header">
         <i class="ti ti-folder-filled"></i>
         <span class="group-name">reports / week-3</span>
         <span class="group-count">0 files</span>
+        <i class="ti ti-chevron-down chevron"></i>
       </div>
       <div class="cards">
 
@@ -1648,6 +1693,15 @@
     </div>
 
     <script>
+      // ── COLLAPSE / EXPAND FOLDER ───────────────
+      // Klik group-header (nama folder) untuk buka/tutup daftar report
+      // di dalamnya. Tidak menyentuh href/path sama sekali.
+      document.querySelectorAll(".group-header").forEach((header) => {
+        header.addEventListener("click", () => {
+          header.parentElement.classList.toggle("collapsed");
+        });
+      });
+
       // ── SEARCH ──────────────────────────────────
       const searchEl = document.getElementById("search");
       const emptyEl = document.getElementById("empty");
@@ -1665,6 +1719,14 @@
           });
           group.style.display = groupVisible > 0 ? "" : "none";
           totalVisible += groupVisible;
+
+          // saat ada kata kunci pencarian, folder otomatis kebuka
+          // supaya hasil kelihatan tanpa perlu diklik manual
+          if (q) {
+            group.classList.add("search-open");
+          } else {
+            group.classList.remove("search-open");
+          }
         });
 
         emptyEl.style.display = totalVisible === 0 ? "block" : "none";
