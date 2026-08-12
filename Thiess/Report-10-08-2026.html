@@ -1,0 +1,1128 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QoS Network Monitor — 2026-07-01 18:04:37</title>
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <style>
+      /* ── Reset & base ── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --bg: #0d1117;
+        --surface: #161b22;
+        --border: #21262d;
+        --text: #e6edf3;
+        --muted: #8b949e;
+        --accent: #00b4d8;
+        --good: #00e676;
+        --warn: #ffca28;
+        --bad: #ef5350;
+        --font: "Segoe UI", system-ui, sans-serif;
+      }
+      html {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      body {
+        min-height: 100vh;
+        padding-bottom: 40px;
+      }
+
+      /* ── Top bar ── */
+      .topbar {
+        background: linear-gradient(90deg, #010409 0%, #0d1117 100%);
+        border-bottom: 1px solid var(--border);
+        padding: 14px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .logo-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 8px var(--accent);
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+      .topbar h1 {
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: var(--text);
+      }
+      .topbar-meta {
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      /* ── Page wrapper ── */
+      .page {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 24px 24px 0;
+      }
+
+      /* ── Section title ── */
+      .section-title {
+        font-size: 11px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--muted);
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 8px;
+        margin: 28px 0 16px;
+      }
+
+      /* ── KPI grid ── */
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+        margin-bottom: 4px;
+      }
+      .kpi {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+        position: relative;
+        overflow: hidden;
+      }
+      .kpi::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--kpi-color, var(--accent));
+      }
+      .kpi-label {
+        font-size: 10px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      .kpi-value {
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1;
+      }
+      .kpi-sub {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 5px;
+      }
+
+      /* ── Chart grid ── */
+      .chart-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-bottom: 14px;
+      }
+      .chart-grid-3 {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        gap: 14px;
+        margin-bottom: 14px;
+      }
+      .chart-grid-1 {
+        display: grid;
+        grid-template-columns: 1fr;
+        margin-bottom: 14px;
+      }
+      .chart-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+      }
+      .chart-box h3 {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+      .chart-inner {
+        width: 100%;
+        min-height: 260px;
+      }
+
+      /* ── Side panels ── */
+      .side-panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+      }
+      .side-panel h3 {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+      }
+      .top-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 7px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .top-item:last-child {
+        border-bottom: none;
+      }
+      .top-name {
+        font-size: 13px;
+        color: var(--text);
+      }
+      .top-badge {
+        font-size: 11px;
+        background: #00b4d822;
+        color: var(--accent);
+        border: 1px solid #00b4d844;
+        border-radius: 20px;
+        padding: 2px 10px;
+      }
+
+      /* ── Table ── */
+      .table-wrap {
+        overflow-x: auto;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12.5px;
+      }
+      thead th {
+        background: #0d1117;
+        color: var(--muted);
+        font-weight: 600;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        padding: 10px 14px;
+        text-align: left;
+        white-space: nowrap;
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+      }
+      tbody tr {
+        border-bottom: 1px solid var(--border);
+        transition: background 0.15s;
+      }
+      tbody tr:hover {
+        background: #1c2128;
+      }
+      tbody td {
+        padding: 9px 14px;
+        color: var(--text);
+        white-space: nowrap;
+      }
+      .mono {
+        font-family: Consolas, monospace;
+        font-size: 12px;
+      }
+      .badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+
+      /* ── Filter bar ── */
+      .filter-bar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+        align-items: center;
+      }
+      .filter-bar input,
+      .filter-bar select {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 12px;
+        outline: none;
+      }
+      .filter-bar input:focus,
+      .filter-bar select:focus {
+        border-color: var(--accent);
+      }
+      .filter-bar label {
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 0.5px;
+      }
+
+      /* ── Threshold legend ── */
+      .threshold-row {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .th-item {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .th-item span {
+        font-weight: 700;
+      }
+      .th-good {
+        color: var(--good);
+      }
+      .th-warn {
+        color: var(--warn);
+      }
+      .th-bad {
+        color: var(--bad);
+      }
+
+      /* ── Footer ── */
+      footer {
+        text-align: center;
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 32px;
+        padding: 16px;
+        border-top: 1px solid var(--border);
+      }
+
+      @media (max-width: 900px) {
+        .chart-grid-2,
+        .chart-grid-3 {
+          grid-template-columns: 1fr;
+        }
+        .kpi-value {
+          font-size: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="logo-dot"></div>
+        <h1>🖥️ QoS Monitor</h1>
+        <span
+          style="
+            font-size: 11px;
+            color: #30363d;
+            padding: 2px 10px;
+            background: #161b22;
+            border-radius: 20px;
+            border: 1px solid #21262d;
+          "
+        >
+          Teams Diagnostics
+        </span>
+      </div>
+      <div class="topbar-meta">
+        Generated: 2026-07-01 18:04:37 &nbsp;·&nbsp; Period: 2026-06-26 12:44 →
+        2026-06-26 16:39 &nbsp;·&nbsp; Source: C:\Users\Adi
+        Saputra\OneDrive\Desktop\QoSE\Graph\reports
+      </div>
+    </div>
+
+    <div class="page">
+      <!-- ═══════ KPI ════════════════════════════════════════════════════════════ -->
+      <div class="section-title">📊 Summary — 5 Reports</div>
+
+      <div class="kpi-grid">
+        <div class="kpi" style="--kpi-color: var(--accent)">
+          <div class="kpi-label">Total Reports</div>
+          <div class="kpi-value">5</div>
+          <div class="kpi-sub">2 regions · 5 IPs</div>
+        </div>
+        <div class="kpi" style="--kpi-color: #00e676">
+          <div class="kpi-label">Avg RTT</div>
+          <div class="kpi-value" style="color: #00e676">38.98 ms</div>
+          <div class="kpi-sub">Min 21.51 · Max 103.4 ms</div>
+        </div>
+        <div class="kpi" style="--kpi-color: var(--accent)">
+          <div class="kpi-label">Avg Std Dev</div>
+          <div class="kpi-value">2.88 ms</div>
+          <div class="kpi-sub">RTT variability</div>
+        </div>
+        <div class="kpi" style="--kpi-color: #00e676">
+          <div class="kpi-label">Avg Jitter</div>
+          <div class="kpi-value" style="color: #00e676">2.37 ms</div>
+          <div class="kpi-sub">RFC 3550 · GOOD ≤ 30 ms</div>
+        </div>
+        <div class="kpi" style="--kpi-color: #00e676">
+          <div class="kpi-label">Avg Packet Loss</div>
+          <div class="kpi-value" style="color: #00e676">0.06%</div>
+          <div class="kpi-sub">GOOD ≤ 1.0% · ACPT ≤ 5.0%</div>
+        </div>
+        <div class="kpi" style="--kpi-color: #00e676">
+          <div class="kpi-label">Avg MOS</div>
+          <div class="kpi-value" style="color: #00e676">4.38</div>
+          <div class="kpi-sub">ITU-T G.107 · Score 1–5</div>
+        </div>
+        <div class="kpi" style="--kpi-color: var(--good)">
+          <div class="kpi-label">GOOD</div>
+          <div class="kpi-value" style="color: var(--good)">5</div>
+          <div class="kpi-sub">100% of reports</div>
+        </div>
+        <div class="kpi" style="--kpi-color: var(--warn)">
+          <div class="kpi-label">WARNING</div>
+          <div class="kpi-value" style="color: var(--warn)">0</div>
+          <div class="kpi-sub">0% of reports</div>
+        </div>
+        <div class="kpi" style="--kpi-color: var(--bad)">
+          <div class="kpi-label">BAD</div>
+          <div class="kpi-value" style="color: var(--bad)">0</div>
+          <div class="kpi-sub">0% of reports</div>
+        </div>
+      </div>
+
+      <!-- ═══════ ROW 1: RTT Timeline + Health Pie ══════════════════════════════ -->
+      <div class="section-title">📈 RTT & Jitter Timeline</div>
+      <div class="chart-grid-2">
+        <div class="chart-box">
+          <h3>⏱ RTT Average per Waktu (ms)</h3>
+          <div class="threshold-row">
+            <span class="th-item th-good">■ GOOD ≤150ms</span>
+            <span class="th-item th-warn">■ ACPT ≤400ms</span>
+            <span class="th-item th-bad">■ BAD >400ms</span>
+          </div>
+          <div id="chart-timeline" class="chart-inner"></div>
+        </div>
+        <div class="chart-box">
+          <h3>〰 Jitter per Waktu (ms)</h3>
+          <div class="threshold-row">
+            <span class="th-item th-good">■ GOOD ≤30ms</span>
+            <span class="th-item th-warn">■ ACPT ≤50ms</span>
+          </div>
+          <div id="chart-jitter" class="chart-inner"></div>
+        </div>
+      </div>
+
+      <!-- ═══════ ROW 2: Packet Loss + MOS + Pie ════════════════════════════════ -->
+      <div class="section-title">📉 Quality Metrics per Region</div>
+      <div class="chart-grid-3">
+        <div class="chart-box">
+          <h3>📦 Avg Packet Loss per Region (%)</h3>
+          <div class="threshold-row">
+            <span class="th-item th-good">■ ≤1%</span>
+            <span class="th-item th-warn">■ 1–5%</span>
+            <span class="th-item th-bad">■ >5%</span>
+          </div>
+          <div id="chart-loss" class="chart-inner"></div>
+        </div>
+        <div class="chart-box">
+          <h3>🎯 Avg MOS Score (G.107)</h3>
+          <div class="threshold-row">
+            <span class="th-item th-good">■ ≥4.0</span>
+            <span class="th-item th-warn">■ 3.5–4.0</span>
+            <span class="th-item th-bad">■ &lt;3.5</span>
+          </div>
+          <div id="chart-mos" class="chart-inner"></div>
+        </div>
+        <div class="chart-box">
+          <h3>🩺 Network Health</h3>
+          <div id="chart-pie" class="chart-inner"></div>
+        </div>
+      </div>
+
+      <!-- ═══════ ROW 3: RTT Range + IP Freq ═══════════════════════════════════ -->
+      <div class="section-title">📊 RTT Range & IP Frequency</div>
+      <div class="chart-grid-2">
+        <div class="chart-box">
+          <h3>📏 RTT Min / Avg / Max per Region (ms)</h3>
+          <div id="chart-rtt-range" class="chart-inner"></div>
+        </div>
+        <div class="chart-box">
+          <h3>🔢 Top IP — Frekuensi Koneksi</h3>
+          <div id="chart-ip-freq" class="chart-inner"></div>
+        </div>
+      </div>
+
+      <!-- ═══════ ROW 4: Scatter RTT vs MOS ════════════════════════════════════ -->
+      <div class="section-title">🔍 Korelasi RTT vs MOS</div>
+      <div class="chart-grid-1">
+        <div class="chart-box">
+          <h3>Scatter: RTT Avg (ms) vs MOS Score — warna = status</h3>
+          <div
+            id="chart-scatter"
+            class="chart-inner"
+            style="min-height: 300px"
+          ></div>
+        </div>
+      </div>
+
+      <!-- ═══════ ROW 5: Top lists ══════════════════════════════════════════════ -->
+      <div class="section-title">🏆 Rankings</div>
+      <div class="chart-grid-2">
+        <div class="side-panel">
+          <h3>🌏 Top Regions by Frequency</h3>
+          <div class="top-item">
+            <span class="top-name">Thiess-SG</span
+            ><span class="top-badge">4 reports</span>
+          </div>
+          <div class="top-item">
+            <span class="top-name">Thiess-JP</span
+            ><span class="top-badge">1 reports</span>
+          </div>
+        </div>
+        <div class="side-panel">
+          <h3>🖥 Top Target IPs by Frequency</h3>
+          <div class="top-item">
+            <span class="top-name mono">52.115.47.109</span
+            ><span class="top-badge">1×</span>
+          </div>
+          <div class="top-item">
+            <span class="top-name mono">52.113.153.36</span
+            ><span class="top-badge">1×</span>
+          </div>
+          <div class="top-item">
+            <span class="top-name mono">52.114.54.134</span
+            ><span class="top-badge">1×</span>
+          </div>
+          <div class="top-item">
+            <span class="top-name mono">52.114.55.120</span
+            ><span class="top-badge">1×</span>
+          </div>
+          <div class="top-item">
+            <span class="top-name mono">52.114.54.138</span
+            ><span class="top-badge">1×</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ DATA TABLE ════════════════════════════════════════════════════ -->
+      <div class="section-title">📋 Detail Data — Semua Report</div>
+
+      <div class="filter-bar">
+        <label>FILTER:</label>
+        <input
+          type="text"
+          id="filter-search"
+          placeholder="🔍 IP / Region / Service…"
+          oninput="filterTable()"
+        />
+        <select id="filter-status" onchange="filterTable()">
+          <option value="">Semua Status</option>
+          <option value="GOOD">GOOD</option>
+          <option value="WARNING">WARNING</option>
+          <option value="BAD">BAD</option>
+        </select>
+        <label
+          style="margin-left: auto; font-size: 12px; color: var(--muted)"
+          id="row-count"
+        ></label>
+      </div>
+
+      <div class="table-wrap">
+        <table id="data-table">
+          <thead>
+            <tr>
+              <th onclick="sortTable(0)">Timestamp ↕</th>
+              <th onclick="sortTable(1)">Target IP ↕</th>
+              <th onclick="sortTable(2)">Region ↕</th>
+              <th onclick="sortTable(3)">Service</th>
+              <th onclick="sortTable(4)">RTT Min ↕</th>
+              <th onclick="sortTable(5)">RTT Avg ↕</th>
+              <th onclick="sortTable(6)">RTT Max ↕</th>
+              <th onclick="sortTable(7)">Std Dev ↕</th>
+              <th onclick="sortTable(8)">Jitter ↕</th>
+              <th onclick="sortTable(9)">Loss ↕</th>
+              <th onclick="sortTable(10)">MOS ↕</th>
+              <th onclick="sortTable(11)">Status ↕</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr>
+              <td>2026-06-26 12:44</td>
+              <td class="mono">52.115.47.109</td>
+              <td>Thiess-JP</td>
+              <td>None</td>
+              <td style="color: #00e676">88.68</td>
+              <td style="color: #00e676">92.38</td>
+              <td style="color: #00e676">103.40</td>
+              <td style="color: #00e676">1.85</td>
+              <td style="color: #00e676">1.52</td>
+              <td style="color: #00e676">0.0%</td>
+              <td style="color: #00e676">4.36</td>
+              <td>
+                <span
+                  class="badge"
+                  style="
+                    background: #00e67622;
+                    color: #00e676;
+                    border: 1px solid #00e67644;
+                  "
+                  >GOOD</span
+                >
+              </td>
+            </tr>
+
+            <tr>
+              <td>2026-06-26 13:33</td>
+              <td class="mono">52.113.153.36</td>
+              <td>Thiess-SG</td>
+              <td>Teams Signaling & Call Control</td>
+              <td style="color: #00e676">21.51</td>
+              <td style="color: #00e676">24.68</td>
+              <td style="color: #00e676">37.74</td>
+              <td style="color: #00e676">2.20</td>
+              <td style="color: #00e676">3.32</td>
+              <td style="color: #00e676">0.0%</td>
+              <td style="color: #00e676">4.38</td>
+              <td>
+                <span
+                  class="badge"
+                  style="
+                    background: #00e67622;
+                    color: #00e676;
+                    border: 1px solid #00e67644;
+                  "
+                  >GOOD</span
+                >
+              </td>
+            </tr>
+
+            <tr>
+              <td>2026-06-26 14:31</td>
+              <td class="mono">52.114.54.134</td>
+              <td>Thiess-SG</td>
+              <td>Teams Media Gateway</td>
+              <td style="color: #00e676">22.33</td>
+              <td style="color: #00e676">26.62</td>
+              <td style="color: #00e676">47.64</td>
+              <td style="color: #00e676">3.52</td>
+              <td style="color: #00e676">2.96</td>
+              <td style="color: #00e676">0.0%</td>
+              <td style="color: #00e676">4.38</td>
+              <td>
+                <span
+                  class="badge"
+                  style="
+                    background: #00e67622;
+                    color: #00e676;
+                    border: 1px solid #00e67644;
+                  "
+                  >GOOD</span
+                >
+              </td>
+            </tr>
+
+            <tr>
+              <td>2026-06-26 15:24</td>
+              <td class="mono">52.114.55.120</td>
+              <td>Thiess-SG</td>
+              <td>Teams Media Gateway</td>
+              <td style="color: #00e676">22.54</td>
+              <td style="color: #00e676">26.10</td>
+              <td style="color: #00e676">65.39</td>
+              <td style="color: #00e676">4.30</td>
+              <td style="color: #00e676">1.95</td>
+              <td style="color: #00e676">0.0%</td>
+              <td style="color: #00e676">4.39</td>
+              <td>
+                <span
+                  class="badge"
+                  style="
+                    background: #00e67622;
+                    color: #00e676;
+                    border: 1px solid #00e67644;
+                  "
+                  >GOOD</span
+                >
+              </td>
+            </tr>
+
+            <tr>
+              <td>2026-06-26 16:39</td>
+              <td class="mono">52.114.54.138</td>
+              <td>Thiess-SG</td>
+              <td>Teams Media Gateway</td>
+              <td style="color: #00e676">21.56</td>
+              <td style="color: #00e676">25.10</td>
+              <td style="color: #00e676">50.89</td>
+              <td style="color: #00e676">2.52</td>
+              <td style="color: #00e676">2.08</td>
+              <td style="color: #00e676">0.3%</td>
+              <td style="color: #00e676">4.39</td>
+              <td>
+                <span
+                  class="badge"
+                  style="
+                    background: #00e67622;
+                    color: #00e676;
+                    border: 1px solid #00e67644;
+                  "
+                  >GOOD</span
+                >
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- /page -->
+
+    <footer>
+      QoS Network Monitor &nbsp;·&nbsp; Generated 2026-07-01 18:04:37
+      &nbsp;·&nbsp; 5 reports from 2026-06-26 12:44 to 2026-06-26 16:39
+    </footer>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- PLOTLY RENDER                                                           -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <script>
+      const CHARTS = {
+        timeline: [
+          {
+            x: ["2026-06-26 12:44:40"],
+            y: [92.38],
+            name: "Thiess-JP",
+            type: "scatter",
+            mode: "lines+markers",
+            line: { color: "#00b4d8", width: 2 },
+            marker: { size: 7 },
+            hovertemplate:
+              "<b>%{x}</b><br>RTT Avg: %{y:.2f} ms<extra>Thiess-JP</extra>",
+          },
+          {
+            x: [
+              "2026-06-26 13:33:50",
+              "2026-06-26 14:31:45",
+              "2026-06-26 15:24:38",
+              "2026-06-26 16:39:34",
+            ],
+            y: [24.68, 26.62, 26.1, 25.1],
+            name: "Thiess-SG",
+            type: "scatter",
+            mode: "lines+markers",
+            line: { color: "#00e676", width: 2 },
+            marker: { size: 7 },
+            hovertemplate:
+              "<b>%{x}</b><br>RTT Avg: %{y:.2f} ms<extra>Thiess-SG</extra>",
+          },
+        ],
+        jitter: [
+          {
+            x: ["2026-06-26 12:44:40"],
+            y: [1.52],
+            name: "Thiess-JP",
+            type: "scatter",
+            mode: "lines+markers",
+            line: { color: "#00b4d8", width: 2, dash: "dot" },
+            marker: { size: 6 },
+            hovertemplate:
+              "<b>%{x}</b><br>Jitter: %{y:.2f} ms<extra>Thiess-JP</extra>",
+          },
+          {
+            x: [
+              "2026-06-26 13:33:50",
+              "2026-06-26 14:31:45",
+              "2026-06-26 15:24:38",
+              "2026-06-26 16:39:34",
+            ],
+            y: [3.32, 2.96, 1.95, 2.08],
+            name: "Thiess-SG",
+            type: "scatter",
+            mode: "lines+markers",
+            line: { color: "#00e676", width: 2, dash: "dot" },
+            marker: { size: 6 },
+            hovertemplate:
+              "<b>%{x}</b><br>Jitter: %{y:.2f} ms<extra>Thiess-SG</extra>",
+          },
+        ],
+        loss: [
+          {
+            x: ["Thiess-JP", "Thiess-SG"],
+            y: [0.0, 0.07],
+            type: "bar",
+            marker: { color: ["#00e676", "#00e676"] },
+            text: ["0.00%", "0.07%"],
+            textposition: "outside",
+            hovertemplate:
+              "Region: %{x}<br>Avg Loss: <b>%{y:.2f}%</b><extra></extra>",
+          },
+        ],
+        mos: [
+          {
+            x: ["Thiess-JP", "Thiess-SG"],
+            y: [4.36, 4.38],
+            type: "bar",
+            marker: { color: ["#00e676", "#00e676"] },
+            text: ["4.36", "4.38"],
+            textposition: "outside",
+            hovertemplate:
+              "Region: %{x}<br>Avg MOS: <b>%{y:.2f}</b><extra></extra>",
+          },
+        ],
+        pie: [
+          {
+            labels: ["GOOD", "WARNING", "BAD"],
+            values: [5, 0, 0],
+            type: "pie",
+            hole: 0.45,
+            marker: { colors: ["#00e676", "#ffca28", "#ef5350"] },
+            textinfo: "label+percent",
+            hovertemplate:
+              "%{label}: <b>%{value}</b> reports (%{percent})<extra></extra>",
+          },
+        ],
+        ip_freq: [
+          {
+            x: [
+              "52.115.47.109",
+              "52.113.153.36",
+              "52.114.54.134",
+              "52.114.55.120",
+              "52.114.54.138",
+            ],
+            y: [1, 1, 1, 1, 1],
+            type: "bar",
+            marker: { color: "#00b4d8" },
+            text: ["1", "1", "1", "1", "1"],
+            textposition: "outside",
+            hovertemplate: "IP: %{x}<br>Frekuensi: <b>%{y}</b><extra></extra>",
+          },
+        ],
+        rtt_range: [
+          {
+            name: "RTT Min",
+            x: ["Thiess-JP", "Thiess-SG"],
+            y: [88.68, 21.51],
+            type: "bar",
+            marker: { color: "#00e676" },
+            hovertemplate: "%{x}<br>RTT Min: <b>%{y:.2f} ms</b><extra></extra>",
+          },
+          {
+            name: "RTT Avg",
+            x: ["Thiess-JP", "Thiess-SG"],
+            y: [92.38, 25.62],
+            type: "bar",
+            marker: { color: "#00b4d8" },
+            hovertemplate: "%{x}<br>RTT Avg: <b>%{y:.2f} ms</b><extra></extra>",
+          },
+          {
+            name: "RTT Max",
+            x: ["Thiess-JP", "Thiess-SG"],
+            y: [103.4, 65.39],
+            type: "bar",
+            marker: { color: "#ef5350" },
+            hovertemplate: "%{x}<br>RTT Max: <b>%{y:.2f} ms</b><extra></extra>",
+          },
+        ],
+        scatter: [
+          {
+            x: [92.38, 24.68, 26.62, 26.1, 25.1],
+            y: [4.36, 4.38, 4.38, 4.39, 4.39],
+            mode: "markers",
+            type: "scatter",
+            marker: {
+              color: ["#00e676", "#00e676", "#00e676", "#00e676", "#00e676"],
+              size: 10,
+              opacity: 0.85,
+            },
+            text: [
+              "Thiess-JP — 52.115.47.109",
+              "Thiess-SG — 52.113.153.36",
+              "Thiess-SG — 52.114.54.134",
+              "Thiess-SG — 52.114.55.120",
+              "Thiess-SG — 52.114.54.138",
+            ],
+            hovertemplate:
+              "<b>%{text}</b><br>RTT Avg: %{x:.2f} ms<br>MOS: %{y:.2f}<extra></extra>",
+          },
+        ],
+      };
+
+      const LAYOUT = {
+        paper_bgcolor: "rgba(0,0,0,0)",
+        plot_bgcolor: "rgba(0,0,0,0)",
+        font: {
+          color: "#e6edf3",
+          family: "'Segoe UI',system-ui,sans-serif",
+          size: 12,
+        },
+        margin: { l: 50, r: 20, t: 20, b: 50 },
+        legend: { bgcolor: "#161b22", bordercolor: "#21262d", borderwidth: 1 },
+        xaxis: { gridcolor: "#21262d", zerolinecolor: "#21262d" },
+        yaxis: { gridcolor: "#21262d", zerolinecolor: "#21262d" },
+      };
+
+      const CFG = { responsive: true, displayModeBar: false };
+
+      function layout(extra = {}) {
+        return Object.assign({}, LAYOUT, extra);
+      }
+
+      // Timeline RTT
+      Plotly.newPlot(
+        "chart-timeline",
+        CHARTS.timeline,
+        layout({
+          shapes: [
+            {
+              type: "line",
+              x0: 0,
+              x1: 1,
+              xref: "paper",
+              y0: 150,
+              y1: 150,
+              line: { color: "#ffca2855", dash: "dot" },
+            },
+            {
+              type: "line",
+              x0: 0,
+              x1: 1,
+              xref: "paper",
+              y0: 400,
+              y1: 400,
+              line: { color: "#ef535055", dash: "dot" },
+            },
+          ],
+          xaxis: { gridcolor: "#21262d", tickangle: -30 },
+          yaxis: { gridcolor: "#21262d", title: "ms" },
+        }),
+        CFG,
+      );
+
+      // Jitter
+      Plotly.newPlot(
+        "chart-jitter",
+        CHARTS.jitter,
+        layout({
+          shapes: [
+            {
+              type: "line",
+              x0: 0,
+              x1: 1,
+              xref: "paper",
+              y0: 30,
+              y1: 30,
+              line: { color: "#ffca2855", dash: "dot" },
+            },
+            {
+              type: "line",
+              x0: 0,
+              x1: 1,
+              xref: "paper",
+              y0: 50,
+              y1: 50,
+              line: { color: "#ef535055", dash: "dot" },
+            },
+          ],
+          xaxis: { gridcolor: "#21262d", tickangle: -30 },
+          yaxis: { gridcolor: "#21262d", title: "ms" },
+        }),
+        CFG,
+      );
+
+      // Packet Loss
+      Plotly.newPlot(
+        "chart-loss",
+        CHARTS.loss,
+        layout({
+          shapes: [
+            {
+              type: "line",
+              x0: -0.5,
+              x1: CHARTS.loss[0].x.length - 0.5,
+              y0: 1,
+              y1: 1,
+              line: { color: "#ffca2866", dash: "dot" },
+            },
+            {
+              type: "line",
+              x0: -0.5,
+              x1: CHARTS.loss[0].x.length - 0.5,
+              y0: 5,
+              y1: 5,
+              line: { color: "#ef535066", dash: "dot" },
+            },
+          ],
+          yaxis: { gridcolor: "#21262d", title: "%", rangemode: "tozero" },
+          xaxis: { gridcolor: "#21262d" },
+        }),
+        CFG,
+      );
+
+      // MOS
+      Plotly.newPlot(
+        "chart-mos",
+        CHARTS.mos,
+        layout({
+          shapes: [
+            {
+              type: "line",
+              x0: -0.5,
+              x1: CHARTS.mos[0].x.length - 0.5,
+              y0: 3.5,
+              y1: 3.5,
+              line: { color: "#ffca2866", dash: "dot" },
+            },
+            {
+              type: "line",
+              x0: -0.5,
+              x1: CHARTS.mos[0].x.length - 0.5,
+              y0: 4.0,
+              y1: 4.0,
+              line: { color: "#00e67666", dash: "dot" },
+            },
+          ],
+          yaxis: { gridcolor: "#21262d", title: "MOS", range: [0, 5] },
+          xaxis: { gridcolor: "#21262d" },
+        }),
+        CFG,
+      );
+
+      // Pie
+      Plotly.newPlot(
+        "chart-pie",
+        CHARTS.pie,
+        layout({ showlegend: true, margin: { t: 10, b: 10, l: 10, r: 10 } }),
+        CFG,
+      );
+
+      // RTT Range
+      Plotly.newPlot(
+        "chart-rtt-range",
+        CHARTS.rtt_range,
+        layout({
+          barmode: "group",
+          yaxis: { gridcolor: "#21262d", title: "ms" },
+          xaxis: { gridcolor: "#21262d" },
+        }),
+        CFG,
+      );
+
+      // IP Frequency
+      Plotly.newPlot(
+        "chart-ip-freq",
+        CHARTS.ip_freq,
+        layout({
+          yaxis: { gridcolor: "#21262d", title: "Count" },
+          xaxis: {
+            gridcolor: "#21262d",
+            tickfont: { family: "Consolas,monospace", size: 11 },
+          },
+        }),
+        CFG,
+      );
+
+      // Scatter
+      Plotly.newPlot(
+        "chart-scatter",
+        CHARTS.scatter,
+        layout({
+          xaxis: { gridcolor: "#21262d", title: "RTT Avg (ms)" },
+          yaxis: { gridcolor: "#21262d", title: "MOS Score" },
+          shapes: [
+            {
+              type: "line",
+              x0: 0,
+              x1: 500,
+              y0: 3.5,
+              y1: 3.5,
+              line: { color: "#ffca2844", dash: "dot" },
+            },
+            {
+              type: "line",
+              x0: 150,
+              x1: 150,
+              y0: 0,
+              y1: 5,
+              line: { color: "#ffca2844", dash: "dot" },
+            },
+          ],
+        }),
+        CFG,
+      );
+
+      // ── Table sort & filter ───────────────────────────────────────────────────
+      let sortDir = {};
+      function sortTable(col) {
+        const tbody = document.getElementById("table-body");
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        sortDir[col] = !sortDir[col];
+        rows.sort((a, b) => {
+          let va = a.cells[col].textContent.trim();
+          let vb = b.cells[col].textContent.trim();
+          const na = parseFloat(va),
+            nb = parseFloat(vb);
+          if (!isNaN(na) && !isNaN(nb)) return sortDir[col] ? na - nb : nb - na;
+          return sortDir[col] ? va.localeCompare(vb) : vb.localeCompare(va);
+        });
+        rows.forEach((r) => tbody.appendChild(r));
+        updateCount();
+      }
+
+      function filterTable() {
+        const search = document
+          .getElementById("filter-search")
+          .value.toLowerCase();
+        const status = document.getElementById("filter-status").value;
+        const rows = document.querySelectorAll("#table-body tr");
+        rows.forEach((row) => {
+          const text = row.textContent.toLowerCase();
+          const rowSt = row.cells[11]?.textContent.trim();
+          const matchT = !search || text.includes(search);
+          const matchS = !status || rowSt === status;
+          row.style.display = matchT && matchS ? "" : "none";
+        });
+        updateCount();
+      }
+
+      function updateCount() {
+        const visible = Array.from(
+          document.querySelectorAll("#table-body tr"),
+        ).filter((r) => r.style.display !== "none").length;
+        document.getElementById("row-count").textContent = visible + " rows";
+      }
+
+      updateCount();
+    </script>
+  </body>
+</html>
