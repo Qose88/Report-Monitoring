@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Laporan Monitoring Harian - Juni 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#f7f8fa; --card:#ffffff; --text:#1a1d23; --muted:#6b7280; --border:#e5e7eb;
+    --jakarta:#2563eb; --bandung:#16a34a; --yogyakarta:#d97706; --bali:#dc2626;
+    --accent:#4f46e5;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f1115; --card:#171a21; --text:#e8eaed; --muted:#9aa0a8; --border:#2a2e37;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0f1115; --card:#171a21; --text:#e8eaed; --muted:#9aa0a8; --border:#2a2e37;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding:24px;
+  }
+  .wrap{max-width:1100px;margin:0 auto;}
+  h1{font-size:1.5rem;margin-bottom:4px;}
+  .subtitle{color:var(--muted);margin-bottom:24px;font-size:0.95rem;}
+  .cards{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;
+  }
+  @media (max-width:700px){.cards{grid-template-columns:repeat(2,1fr);}}
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:12px;
+    padding:16px;
+  }
+  .card .loc{font-weight:600;font-size:0.95rem;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+  .metric{font-size:1.4rem;font-weight:700;margin:2px 0;}
+  .metric-label{font-size:0.75rem;color:var(--muted);}
+  .row{display:flex;justify-content:space-between;margin-top:8px;font-size:0.8rem;color:var(--muted);}
+  .chart-card{
+    background:var(--card);border:1px solid var(--border);border-radius:12px;
+    padding:20px;margin-bottom:24px;
+  }
+  .chart-card h2{font-size:1.05rem;margin:0 0 4px 0;}
+  .chart-card .desc{color:var(--muted);font-size:0.85rem;margin-bottom:14px;}
+  canvas{max-width:100%;}
+  table{width:100%;border-collapse:collapse;font-size:0.85rem;overflow-x:auto;display:block;}
+  th,td{padding:8px 10px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap;}
+  th{color:var(--muted);font-weight:600;}
+  td:first-child,th:first-child{text-align:left;position:sticky;left:0;background:var(--card);}
+  .table-wrap{overflow-x:auto;}
+  footer{color:var(--muted);font-size:0.75rem;text-align:center;margin-top:20px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📡 Laporan Monitoring Harian — Mitrais</h1>
+  <div class="subtitle">Periode: Juni 2026 · 4 Minggu × 5 Hari Kerja (Senin–Jumat) · 4 Lokasi</div>
+
+  <div class="cards" id="summaryCards"></div>
+
+  <div class="chart-card">
+    <h2>Tren Latency Harian per Lokasi</h2>
+    <div class="desc">Garis putus-putus menunjukkan rata-rata (average) latency masing-masing lokasi selama periode ini.</div>
+    <canvas id="latencyChart" height="110"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <h2>Tren Packet Loss (%) Harian per Lokasi</h2>
+    <div class="desc">Packet loss umumnya 0%, dengan beberapa lonjakan (spike) yang ditandai.</div>
+    <canvas id="plChart" height="90"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <h2>Ringkasan Statistik per Lokasi</h2>
+    <div class="table-wrap">
+    <table id="statsTable"></table>
+    </div>
+  </div>
+
+  <footer>Sumber: Mitrais_Daily_Monitoring_-_JUN26.xlsx · Dibuat otomatis oleh Claude</footer>
+</div>
+
+<script>
+const days = [];
+["W1","W2","W3","W4"].forEach(w=>{
+  ["Sen","Sel","Rab","Kam","Jum"].forEach(d=> days.push(w+"-"+d));
+});
+
+const colors = {
+  "Jakarta":"#2563eb",
+  "Bandung":"#16a34a",
+  "Yogyakarta":"#d97706",
+  "Bali":"#dc2626"
+};
+
+const data = {
+  "Jakarta": {
+    latency: [18,17.5,17.5,18.5,18, 16,14,17,16.5,15.5, 18,14,17.25,18.75,19.25, 18,17.25,17,16,17.25],
+    pl: [0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0],
+    max: 21, min: 13
+  },
+  "Bandung": {
+    latency: [21,17,20.25,21,20, 18,18.25,18.5,18.25,18.25, 20,18.25,20,20.75,22, 21,20,20,20,20.5],
+    pl: [0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,1,0],
+    max: 24, min: 16
+  },
+  "Yogyakarta": {
+    latency: [22,22.75,23,23,23.5, 23,23.5,23.25,23.5,23.25, 21,23.5,23.25,22.5,21.5, 23,23.25,22.5,23.5,23],
+    pl: [0,0,0,0,0, 0,11,0,0,0, 0,11,0,0,0, 1,0,0,0,0],
+    max: 25, min: 20
+  },
+  "Bali": {
+    latency: [36,35.25,35.5,35.5,35.5, 33,34.5,32.75,33,33, 36,34.5,36,36.5,36.25, 36,34.25,35,36,35.75],
+    pl: [0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0],
+    max: 38, min: 32
+  }
+};
+
+function avg(arr){ return arr.reduce((a,b)=>a+b,0)/arr.length; }
+function round1(n){ return Math.round(n*10)/10; }
+
+// ---- Summary cards ----
+const cardsEl = document.getElementById('summaryCards');
+Object.keys(data).forEach(loc=>{
+  const d = data[loc];
+  const avgLat = round1(avg(d.latency));
+  const avgPl = round1(avg(d.pl));
+  cardsEl.innerHTML += `
+    <div class="card">
+      <div class="loc"><span class="dot" style="background:${colors[loc]}"></span>${loc}</div>
+      <div class="metric-label">Rata-rata Latency</div>
+      <div class="metric">${avgLat} ms</div>
+      <div class="row"><span>Max: ${d.max} ms</span><span>Min: ${d.min} ms</span></div>
+      <div class="row"><span>Rata-rata PL: ${avgPl}%</span></div>
+    </div>`;
+});
+
+// ---- Latency chart ----
+const latencyDatasets = [];
+Object.keys(data).forEach(loc=>{
+  const d = data[loc];
+  const a = avg(d.latency);
+  latencyDatasets.push({
+    label: loc,
+    data: d.latency,
+    borderColor: colors[loc],
+    backgroundColor: colors[loc],
+    borderWidth: 2,
+    pointRadius: 2,
+    tension: 0.25,
+    spanGaps: true
+  });
+  latencyDatasets.push({
+    label: loc + ' (avg ' + round1(a) + ' ms)',
+    data: days.map(()=>a),
+    borderColor: colors[loc],
+    borderWidth: 1.5,
+    borderDash: [6,4],
+    pointRadius: 0,
+    tension: 0
+  });
+});
+
+const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+const textColor = isDark ? '#c9ccd1' : '#4b5563';
+
+new Chart(document.getElementById('latencyChart'), {
+  type: 'line',
+  data: { labels: days, datasets: latencyDatasets },
+  options: {
+    responsive: true,
+    interaction: { mode: 'nearest', intersect: false },
+    plugins: {
+      legend: { position:'bottom', labels:{ color:textColor, boxWidth:14, font:{size:11} } },
+      tooltip: { mode:'index', intersect:false }
+    },
+    scales: {
+      x: { ticks:{ color:textColor, font:{size:10} }, grid:{ color:gridColor } },
+      y: { title:{ display:true, text:'Latency (ms)', color:textColor }, ticks:{ color:textColor }, grid:{ color:gridColor } }
+    }
+  }
+});
+
+// ---- PL chart ----
+const plDatasets = Object.keys(data).map(loc=>({
+  label: loc,
+  data: data[loc].pl,
+  borderColor: colors[loc],
+  backgroundColor: colors[loc],
+  borderWidth: 2,
+  pointRadius: data[loc].pl.map(v=> v>0 ? 4 : 1.5),
+  tension: 0.2
+}));
+
+new Chart(document.getElementById('plChart'), {
+  type: 'line',
+  data: { labels: days, datasets: plDatasets },
+  options: {
+    responsive: true,
+    interaction: { mode:'nearest', intersect:false },
+    plugins: {
+      legend: { position:'bottom', labels:{ color:textColor, boxWidth:14, font:{size:11} } },
+      tooltip: { mode:'index', intersect:false }
+    },
+    scales: {
+      x: { ticks:{ color:textColor, font:{size:10} }, grid:{ color:gridColor } },
+      y: { title:{ display:true, text:'Packet Loss (%)', color:textColor }, ticks:{ color:textColor }, grid:{ color:gridColor }, beginAtZero:true }
+    }
+  }
+});
+
+// ---- Stats table ----
+const tbl = document.getElementById('statsTable');
+let html = '<tr><th>Lokasi</th><th>Avg Latency (ms)</th><th>Max Latency (ms)</th><th>Min Latency (ms)</th><th>Avg PL (%)</th></tr>';
+Object.keys(data).forEach(loc=>{
+  const d = data[loc];
+  html += `<tr><td>${loc}</td><td>${round1(avg(d.latency))}</td><td>${d.max}</td><td>${d.min}</td><td>${round1(avg(d.pl))}</td></tr>`;
+});
+tbl.innerHTML = html;
+</script>
+</body>
+</html>
